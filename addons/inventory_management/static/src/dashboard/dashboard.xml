@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="inventory_management.Dashboard">
+        <div class="o_im_dashboard p-4">
+            <h2>Inventory Management</h2>
+            <t t-if="state.data">
+                <div class="o_im_dashboard_tiles d-flex flex-wrap gap-3 mb-4">
+                    <div class="o_im_dashboard_tile p-3">
+                        <div class="o_im_dashboard_tile_value" t-esc="state.data.product_count"/>
+                        <div class="o_im_dashboard_tile_label">Products</div>
+                    </div>
+                    <div class="o_im_dashboard_tile p-3">
+                        <div class="o_im_dashboard_tile_value" t-esc="state.data.category_count"/>
+                        <div class="o_im_dashboard_tile_label">Categories</div>
+                    </div>
+                    <div class="o_im_dashboard_tile p-3">
+                        <div class="o_im_dashboard_tile_value" t-esc="state.data.warehouse_count"/>
+                        <div class="o_im_dashboard_tile_label">Warehouses</div>
+                    </div>
+                    <div class="o_im_dashboard_tile p-3">
+                        <div class="o_im_dashboard_tile_value" t-esc="state.data.location_count"/>
+                        <div class="o_im_dashboard_tile_label">Locations</div>
+                    </div>
+                    <div class="o_im_dashboard_tile p-3">
+                        <div class="o_im_dashboard_tile_value" t-esc="state.data.supplier_count"/>
+                        <div class="o_im_dashboard_tile_label">Suppliers</div>
+                    </div>
+                    <div class="o_im_dashboard_tile p-3">
+                        <div class="o_im_dashboard_tile_value" t-esc="state.data.customer_count"/>
+                        <div class="o_im_dashboard_tile_label">Customers</div>
+                    </div>
+                </div>
+                <div class="o_im_dashboard_charts d-flex flex-wrap gap-4">
+                    <div class="o_im_dashboard_chart">
+                        <h4>Products by Category</h4>
+                        <div class="o_im_dashboard_chart_canvas">
+                            <canvas t-ref="categoryChart"/>
+                        </div>
+                    </div>
+                    <div class="o_im_dashboard_chart">
+                        <h4>Contacts by Role</h4>
+                        <div class="o_im_dashboard_chart_canvas">
+                            <canvas t-ref="roleChart"/>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>

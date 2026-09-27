@@ -29,6 +29,13 @@ yet). See the project README and OpenSpec change history for progress.
     "demo": [
         "demo/im_demo_data.xml",
     ],
+    "assets": {
+        "web.assets_backend": [
+            "inventory_management/static/src/dashboard/dashboard.js",
+            "inventory_management/static/src/dashboard/dashboard.xml",
+            "inventory_management/static/src/dashboard/dashboard.scss",
+        ],
+    },
     "installable": True,
     "application": True,
 }
