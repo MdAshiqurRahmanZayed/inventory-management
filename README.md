@@ -14,6 +14,21 @@ This project was originally called "Stock Pilot". It has been renamed to **Inven
 
 This scaffold and its Docker environment run **Odoo 19**, per explicit project decision (the plan below was originally written against Odoo 18).
 
+## Addons layout: `addons/` vs `extra-addons/`
+
+- **`addons/`** — this project's own code (`inventory_management`). Committed to git.
+- **`extra-addons/`** — third-party (OCA) modules. **Gitignored**, not committed — fetched on demand by `scripts/fetch-extra-addons.sh` (see below), so the repo doesn't vendor other people's source in git history.
+
+### Included third-party module: OCA Web Responsive
+
+[OCA's `web_responsive`](https://github.com/OCA/web/tree/19.0/web_responsive) (LGPL-3, © LasLabs, Tecnativa, ITerra, Onestein and other OCA contributors, unmodified, `19.0` branch) restores Odoo Enterprise's icon-grid app launcher/home menu in Community Edition. Fetched into `extra-addons/web_responsive/` by the script below. Installed independently — **not** a dependency of `inventory_management` — so `inventory_management` keeps depending only on `base` and `mail` as designed. Optional, but recommended for a nicer UI.
+
+Fetch it (and any future OCA modules the script is extended to cover):
+```bash
+./scripts/fetch-extra-addons.sh
+```
+Safe to re-run — it skips any module already present in `extra-addons/`.
+
 ## Project Plan
 
 ### Goal
@@ -306,14 +321,19 @@ Requires Docker and Docker Compose.
    ```bash
    cp odoo.conf.example odoo.conf
    ```
-2. Start Odoo + Postgres:
+2. Fetch third-party addons (see "Addons layout" above):
+   ```bash
+   ./scripts/fetch-extra-addons.sh
+   ```
+3. Start Odoo + Postgres:
    ```bash
    docker compose up
    ```
    First run pulls the `odoo:19.0` and `postgres:16` images, which can take a few minutes.
-3. Open Odoo in your browser at [http://localhost:8069](http://localhost:8069) and create/select a database. If port 8069 is already used by another project, edit the host-side port directly in `docker-compose.yml`'s `ports:` section (e.g. `"8169:8069"`).
-4. Go to **Apps**, click **Update Apps List**, remove the "Apps" filter, search for **"Inventory Management"**, and click **Install**.
-5. Confirm the module installs with no errors — this scaffold ships no business logic yet, so installing it just adds an empty "Inventory Management" app to the menu.
+4. Open Odoo in your browser at [http://localhost:8069](http://localhost:8069) and create/select a database. If port 8069 is already used by another project, edit the host-side port directly in `docker-compose.yml`'s `ports:` section (e.g. `"8169:8069"`).
+5. Go to **Apps**, click **Update Apps List**, remove the "Apps" filter, search for **"Inventory Management"**, and click **Install**.
+6. Confirm the module installs with no errors — this scaffold ships no business logic yet, so installing it just adds an empty "Inventory Management" app to the menu.
+7. Optional: search for **"Web Responsive"** and install it too, for the icon-grid app launcher (click the waffle icon top-left after installing).
 
 To stop the environment: `docker compose down` (add `-v` to also drop the database volume).
 
@@ -321,8 +341,10 @@ To stop the environment: `docker compose down` (add `-v` to also drop the databa
 
 ## Repository layout
 
-- `addons/inventory_management/` — the Odoo module source.
-- `docker-compose.yml`, `odoo.conf.example` — local dev environment (copy `odoo.conf.example` to `odoo.conf`, gitignored; it's the single place DB credentials, admin password, and addons path are configured).
+- `addons/inventory_management/` — this project's own Odoo module source. Committed.
+- `extra-addons/` — third-party (OCA) modules, e.g. `web_responsive`. Gitignored; fetched via `scripts/fetch-extra-addons.sh`.
+- `scripts/fetch-extra-addons.sh` — (re-)fetches everything under `extra-addons/`.
+- `docker-compose.yml`, `odoo.conf.example` — local dev environment (copy `odoo.conf.example` to `odoo.conf`, gitignored; it's the single place DB credentials, admin password, and addons path are configured). Mounts both `addons/` and `extra-addons/` into the container at `/mnt/addons` and `/mnt/extra-addons` respectively.
 - `openspec/` — [OpenSpec](https://openspec.dev) planning artifacts (proposals, specs, design, tasks) driving this project's development.
 
 ## Roadmap

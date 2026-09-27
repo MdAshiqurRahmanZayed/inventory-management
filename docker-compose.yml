@@ -20,7 +20,8 @@ services:
       - "8069:8069"
     volumes:
       - odoo-web-data:/var/lib/odoo
-      - ./addons:/mnt/extra-addons
+      - ./addons:/mnt/addons
+      - ./extra-addons:/mnt/extra-addons
       - ./odoo.conf:/etc/odoo/odoo.conf
     restart: unless-stopped
 
