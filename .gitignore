@@ -1,0 +1,46 @@
+# Odoo config (local secrets — copy odoo.conf.example to odoo.conf)
+odoo.conf
+!odoo.conf.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+.Python
+build/
+dist/
+.venv/
+venv/
+env/
+.odoo_venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Odoo
+*.log
+*.pot
+.odoo.conf.local
+
+# Docker (named volumes are managed by Docker, not files here, but ignore any local bind-mount data dirs)
+odoo-data/
+db-data/
+postgres-data/
+
+# Node (if odoo-mcp or tooling adds a JS/TS toolchain later)
+node_modules/
+npm-debug.log*
+
+# Editors / IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

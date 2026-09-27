@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_inventory_management_root" model="ir.actions.client">
+        <field name="name">Inventory Management</field>
+        <field name="tag">reload</field>
+        <field name="params" eval="{'url': '/odoo'}"/>
+    </record>
+
+    <menuitem
+        id="menu_inventory_management_root"
+        name="Inventory Management"
+        sequence="10"
+        web_icon="inventory_management,static/description/icon.png"
+        action="action_inventory_management_root"/>
+</odoo>

@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      # Must match db_user/db_password in odoo.conf.
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: odoo
+      POSTGRES_DB: postgres
+    volumes:
+      - odoo-db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  odoo:
+    image: odoo:19.0
+    depends_on:
+      - db
+    ports:
+      # Change the host-side port here directly if 8069 is already used by
+      # another local project (e.g. "8169:8069").
+      - "8069:8069"
+    volumes:
+      - odoo-web-data:/var/lib/odoo
+      - ./addons:/mnt/extra-addons
+      - ./odoo.conf:/etc/odoo/odoo.conf
+    restart: unless-stopped
+
+volumes:
+  odoo-db-data:
+  odoo-web-data:

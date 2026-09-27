@@ -1,0 +1,16 @@
+[options]
+; admin_passwd protects the /web/database/manager screen (create/drop/duplicate DBs).
+; This is a throwaway local-dev value — change it before running anywhere reachable
+; beyond your own machine.
+;
+; db_user/db_password here MUST match POSTGRES_USER/POSTGRES_PASSWORD in
+; docker-compose.yml's db service. Odoo's docker entrypoint only injects its
+; own env-var-derived DB connection args when a given db_* key is absent from
+; this file (see https://github.com/odoo/docker/blob/master/19.0/entrypoint.sh) —
+; since we set them here, this file is the single source of truth.
+addons_path = /mnt/extra-addons,/usr/lib/python3/dist-packages/odoo/addons
+admin_passwd = change-me-local-dev-only
+db_host = db
+db_port = 5432
+db_user = odoo
+db_password = odoo
