@@ -1,9 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="action_inventory_management_root" model="ir.actions.client">
+    <record id="im_welcome_view_form" model="ir.ui.view">
+        <field name="name">im.welcome.form</field>
+        <field name="model">im.welcome</field>
+        <field name="arch" type="xml">
+            <form string="Inventory Management">
+                <sheet>
+                    <field name="message" readonly="1"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_inventory_management_root" model="ir.actions.act_window">
         <field name="name">Inventory Management</field>
-        <field name="tag">reload</field>
-        <field name="params" eval="{'url': '/odoo'}"/>
+        <field name="res_model">im.welcome</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="context">{'form_view_initial_mode': 'readonly'}</field>
     </record>
 
     <menuitem
