@@ -8,7 +8,7 @@
 ; own env-var-derived DB connection args when a given db_* key is absent from
 ; this file (see https://github.com/odoo/docker/blob/master/19.0/entrypoint.sh) —
 ; since we set them here, this file is the single source of truth.
-addons_path = /mnt/extra-addons,/usr/lib/python3/dist-packages/odoo/addons
+addons_path = /mnt/addons,/mnt/extra-addons,/usr/lib/python3/dist-packages/odoo/addons
 admin_passwd = change-me-local-dev-only
 db_host = db
 db_port = 5432

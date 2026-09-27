@@ -1,0 +1,30 @@
+.o_im_dashboard {
+    .o_im_dashboard_tile {
+        min-width: 140px;
+        border: 1px solid var(--border-color, #dee2e6);
+        border-radius: 6px;
+        text-align: center;
+    }
+
+    .o_im_dashboard_tile_value {
+        font-size: 1.75rem;
+        font-weight: 600;
+    }
+
+    .o_im_dashboard_tile_label {
+        font-size: 0.85rem;
+        opacity: 0.75;
+    }
+
+    .o_im_dashboard_chart {
+        width: 320px;
+        max-width: 100%;
+    }
+
+    .o_im_dashboard_chart_canvas {
+        // Chart.js with maintainAspectRatio:false needs an explicit height on
+        // its container, otherwise the canvas grows unbounded downward.
+        height: 240px;
+        position: relative;
+    }
+}

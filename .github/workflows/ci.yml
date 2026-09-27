@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ruff:
+    name: Ruff lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run ruff
+        uses: astral-sh/ruff-action@v3
+        with:
+          args: "check"
+
+  odoo-tests:
+    name: Odoo module tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare Odoo config
+        run: cp odoo.conf.example odoo.conf
+
+      - name: Start Postgres
+        run: docker compose up -d db
+
+      - name: Wait for Postgres to be healthy
+        run: |
+          for i in $(seq 1 30); do
+            status="$(docker inspect -f '{{.State.Health.Status}}' inventory-management-db-1 2>/dev/null || true)"
+            if [ "$status" = "healthy" ]; then
+              echo "Postgres is healthy"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Postgres did not become healthy in time"
+          docker compose logs db
+          exit 1
+
+      - name: Run inventory_management tests
+        run: |
+          docker compose run --rm odoo odoo \
+            -d ci_test \
+            -i inventory_management \
+            --test-enable \
+            --test-tags /inventory_management \
+            --stop-after-init \
+            --http-port=8169
+
+      - name: Show logs on failure
+        if: failure()
+        run: docker compose logs

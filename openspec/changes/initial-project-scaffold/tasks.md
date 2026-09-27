@@ -29,3 +29,30 @@
 - [x] 4.2 Add README section: updating Apps list and installing "Inventory Management" module
 - [x] 4.3 Verified: `docker compose up` starts cleanly (Odoo 19 + Postgres), `inventory_management` module installs headlessly (`odoo -i inventory_management --stop-after-init`) with 0 errors/tracebacks
 - [x] 4.4 No install errors found. Found and fixed: default port 8069 can collide with other local Odoo projects (documented as a direct edit to `docker-compose.yml`'s `ports:` line); hardened `odoo.conf`'s placeholder `admin_passwd`; moved `odoo.conf` to `odoo.conf.example` + gitignore; consolidated all config into `odoo.conf` alone (removed `.env`/`.env.example`, hardcoded matching Postgres creds in `docker-compose.yml`) per instruction to use only `odoo.conf`; re-verified clean headless install after each config change
+
+## 5. Landing page & UI polish
+
+- [x] 5.1 Replace the app menu's `ir.actions.client` (tag="reload") placeholder with a real `ir.actions.act_window` + `im.welcome` TransientModel form, so clicking the app lands on an actual page instead of reloading the generic backend home
+- [x] 5.2 Generate a real flat-style app icon (750x750 PNG, teal box glyph) replacing the 1x1 placeholder pixel
+- [x] 5.3 Add `ir.model.access.csv` row for `im.welcome` (base.group_user)
+- [x] 5.4 Vendor OCA's `web_responsive` (19.0 branch, unmodified, LGPL-3), installed independently — not a dependency of `inventory_management` — to restore the Enterprise-style icon-grid app launcher in Community Edition
+- [x] 5.5 Document both in README (third-party module attribution + optional install step)
+- [x] 5.6 Verified in Docker: dropped/recreated dev DB after the action's model-type change (Odoo won't let an XML upgrade morph an existing record's model in place); confirmed landing page renders and grid launcher works via real menu navigation
+
+## 6. Addons layout: separate third-party root
+
+- [x] 6.1 Move `web_responsive` out of `addons/` into a new `extra-addons/` root, so this project's own code (`addons/`) and vendored third-party code (`extra-addons/`) are never mixed
+- [x] 6.2 Gitignore `/extra-addons/*` (with a tracked `.gitkeep`) — vendored code isn't committed to this repo's history
+- [x] 6.3 Create `scripts/fetch-extra-addons.sh`: idempotent sparse-clone fetcher (currently just `web_responsive` from `OCA/web@19.0`), skips modules already present, strips `.git`/`__pycache__`
+- [x] 6.4 Update `docker-compose.yml`: mount `./addons` → `/mnt/addons` and `./extra-addons` → `/mnt/extra-addons` as two separate volumes
+- [x] 6.5 Update `odoo.conf.example`'s `addons_path` to list both `/mnt/addons` and `/mnt/extra-addons`
+- [x] 6.6 Update README: new "Addons layout" section, fetch-script step added to the Docker setup instructions, repository layout list updated
+- [x] 6.7 Verified: recreated containers with new mounts, confirmed both paths visible inside the container, upgraded both modules headlessly with 0 errors; ran the fetch script from a clean `extra-addons/` and confirmed it reproduces an identical module tree
+
+## 7. CI: ruff + Odoo tests
+
+- [x] 7.1 Add `ruff.toml`: lints only `addons/` (excludes vendored `extra-addons/`); `__init__.py` re-export imports exempted from F401 (standard Odoo pattern); `force-single-line` isort for clean one-line-per-model diffs
+- [x] 7.2 Add Postgres healthcheck (`pg_isready`) to `docker-compose.yml`'s `db` service; `odoo` service now depends on `db` being healthy, not just started (fixes a race the earlier code review flagged)
+- [x] 7.3 Add `.github/workflows/ci.yml`: `ruff` job (lint) + `odoo-tests` job (starts Postgres, waits for healthy, runs `inventory_management`'s tests via `docker compose run --rm`, isolated with `--test-tags`), on push/PR to `main`
+- [x] 7.4 Document CI + local-equivalent commands in README
+- [x] 7.5 Verified locally: `ruff check` passes clean after fixing real issues found (unsorted imports); `docker compose ps` shows `db` healthy before `odoo` starts; module still installs with 0 errors after import reformatting; workflow YAML syntax validated

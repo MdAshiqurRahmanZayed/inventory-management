@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="im_product_view_list" model="ir.ui.view">
+        <field name="name">im.product.list</field>
+        <field name="model">im.product</field>
+        <field name="arch" type="xml">
+            <list string="Products">
+                <field name="sku"/>
+                <field name="name"/>
+                <field name="category_id"/>
+                <field name="reorder_level"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="im_product_view_form" model="ir.ui.view">
+        <field name="name">im.product.form</field>
+        <field name="model">im.product</field>
+        <field name="arch" type="xml">
+            <form string="Product">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="sku"/>
+                            <field name="category_id"/>
+                            <field name="uom"/>
+                        </group>
+                        <group>
+                            <field name="cost"/>
+                            <field name="sale_price"/>
+                            <field name="reorder_level"/>
+                            <field name="qty_on_hand" readonly="1"/>
+                            <field name="supplier_id"/>
+                        </group>
+                    </group>
+                    <field name="description" placeholder="Product description..."/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_im_product" model="ir.actions.act_window">
+        <field name="name">Products</field>
+        <field name="res_model">im.product</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem
+        id="menu_im_product"
+        name="Products"
+        parent="menu_inventory_management_root"
+        action="action_im_product"
+        sequence="10"/>
+</odoo>

@@ -2,6 +2,10 @@
 odoo.conf
 !odoo.conf.example
 
+# Vendored third-party addons — fetched via scripts/fetch-extra-addons.sh, not committed
+/extra-addons/*
+!/extra-addons/.gitkeep
+
 # Python
 __pycache__/
 *.py[cod]

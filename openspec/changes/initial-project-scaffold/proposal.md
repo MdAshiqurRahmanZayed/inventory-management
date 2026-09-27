@@ -8,6 +8,7 @@ The repo currently has no code, only a project plan doc and OpenSpec tooling. Be
 - Add minimal `inventory_management` Odoo module scaffold: `__manifest__.py`, `__init__.py`, empty `models/`, `security/ir.model.access.csv` stub, `views/` stub — depends only on `base` and `mail`, no business logic yet.
 - Add `docker-compose.yml` + `odoo.conf.example` running Odoo 19 + Postgres, mounting `inventory_management` as a custom addon, so the module can be installed and verified via the Odoo Apps UI. All local config (DB creds, admin password, addons path) lives in `odoo.conf` alone — no `.env` file.
 - Update README with Docker instructions: `docker compose up`, accessing Odoo, installing the module.
+- Replace the app's placeholder landing action with a real page, and vendor OCA's `web_responsive` module (installed independently) to restore the icon-grid app launcher in Community Edition.
 
 ## Capabilities
 
@@ -20,6 +21,7 @@ The repo currently has no code, only a project plan doc and OpenSpec tooling. Be
 
 ## Impact
 
-- New files: `README.md`, `docker-compose.yml`, `odoo.conf.example`, `addons/inventory_management/**`.
+- New files: `README.md`, `docker-compose.yml`, `odoo.conf.example`, `addons/inventory_management/**`, `scripts/fetch-extra-addons.sh`, `extra-addons/.gitkeep`.
+- `extra-addons/web_responsive/**` (vendored OCA module, LGPL-3, unmodified) is fetched by the script, not committed — `extra-addons/` is gitignored.
 - No existing code affected (repo currently empty besides OpenSpec tooling).
 - No business logic, models, views, or security rules beyond the empty stub needed for Odoo to load the module.
