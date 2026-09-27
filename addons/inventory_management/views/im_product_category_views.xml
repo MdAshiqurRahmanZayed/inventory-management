@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="im_product_category_view_list" model="ir.ui.view">
+        <field name="name">im.product.category.list</field>
+        <field name="model">im.product.category</field>
+        <field name="arch" type="xml">
+            <list string="Product Categories">
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="im_product_category_view_form" model="ir.ui.view">
+        <field name="name">im.product.category.form</field>
+        <field name="model">im.product.category</field>
+        <field name="arch" type="xml">
+            <form string="Product Category">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_im_product_category" model="ir.actions.act_window">
+        <field name="name">Product Categories</field>
+        <field name="res_model">im.product.category</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem
+        id="menu_im_product_category"
+        name="Product Categories"
+        parent="menu_inventory_management_root"
+        action="action_im_product_category"
+        sequence="20"/>
+</odoo>

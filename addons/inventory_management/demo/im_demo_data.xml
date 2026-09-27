@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!-- Categories -->
+    <record id="demo_category_electronics" model="im.product.category">
+        <field name="name">Electronics</field>
+    </record>
+    <record id="demo_category_office" model="im.product.category">
+        <field name="name">Office Supplies</field>
+    </record>
+    <record id="demo_category_furniture" model="im.product.category">
+        <field name="name">Furniture</field>
+    </record>
+
+    <!-- Suppliers -->
+    <record id="demo_supplier_1" model="res.partner">
+        <field name="name">Alpha Components Ltd</field>
+        <field name="email">sales@alphacomponents.example</field>
+        <field name="partner_role">supplier</field>
+    </record>
+    <record id="demo_supplier_2" model="res.partner">
+        <field name="name">Bengal Office Supply Co</field>
+        <field name="email">orders@bengaloffice.example</field>
+        <field name="partner_role">supplier</field>
+    </record>
+    <record id="demo_supplier_3" model="res.partner">
+        <field name="name">Crestline Furniture Works</field>
+        <field name="email">info@crestlinefurniture.example</field>
+        <field name="partner_role">supplier</field>
+    </record>
+    <record id="demo_supplier_4" model="res.partner">
+        <field name="name">Delta Electronics Wholesale</field>
+        <field name="email">wholesale@deltaelectronics.example</field>
+        <field name="partner_role">supplier</field>
+    </record>
+    <record id="demo_supplier_5" model="res.partner">
+        <field name="name">Everest Trading House</field>
+        <field name="email">contact@everesttrading.example</field>
+        <field name="partner_role">both</field>
+    </record>
+
+    <!-- Customers -->
+    <record id="demo_customer_1" model="res.partner">
+        <field name="name">Green Valley Retailers</field>
+        <field name="email">purchasing@greenvalley.example</field>
+        <field name="partner_role">customer</field>
+    </record>
+    <record id="demo_customer_2" model="res.partner">
+        <field name="name">Horizon Tech Solutions</field>
+        <field name="email">procurement@horizontech.example</field>
+        <field name="partner_role">customer</field>
+    </record>
+    <record id="demo_customer_3" model="res.partner">
+        <field name="name">Ivory Home Interiors</field>
+        <field name="email">orders@ivoryhome.example</field>
+        <field name="partner_role">customer</field>
+    </record>
+    <record id="demo_customer_4" model="res.partner">
+        <field name="name">Jasmine Corporate Services</field>
+        <field name="email">admin@jasminecorp.example</field>
+        <field name="partner_role">customer</field>
+    </record>
+    <record id="demo_customer_5" model="res.partner">
+        <field name="name">Kestrel Logistics Ltd</field>
+        <field name="email">supply@kestrellogistics.example</field>
+        <field name="partner_role">customer</field>
+    </record>
+    <record id="demo_customer_6" model="res.partner">
+        <field name="name">Lotus Business Center</field>
+        <field name="email">office@lotusbc.example</field>
+        <field name="partner_role">customer</field>
+    </record>
+    <record id="demo_customer_7" model="res.partner">
+        <field name="name">Meridian Traders</field>
+        <field name="email">buying@meridiantraders.example</field>
+        <field name="partner_role">customer</field>
+    </record>
+    <record id="demo_customer_8" model="res.partner">
+        <field name="name">Nightingale Furnishings</field>
+        <field name="email">orders@nightingalefurnishings.example</field>
+        <field name="partner_role">customer</field>
+    </record>
+    <record id="demo_customer_9" model="res.partner">
+        <field name="name">Oakridge Enterprises</field>
+        <field name="email">purchasing@oakridge.example</field>
+        <field name="partner_role">customer</field>
+    </record>
+    <record id="demo_customer_10" model="res.partner">
+        <field name="name">Palmgrove Retail Group</field>
+        <field name="email">orders@palmgrove.example</field>
+        <field name="partner_role">customer</field>
+    </record>
+
+    <!-- Warehouses -->
+    <record id="demo_warehouse_main" model="im.warehouse">
+        <field name="name">Main Warehouse</field>
+        <field name="address">12 Gulshan Avenue, Dhaka</field>
+        <field name="capacity">5000</field>
+        <field name="email">main-warehouse@inventory-management.example</field>
+    </record>
+    <record id="demo_warehouse_north" model="im.warehouse">
+        <field name="name">North Warehouse</field>
+        <field name="address">45 Agrabad Road, Chattogram</field>
+        <field name="capacity">3000</field>
+        <field name="email">north-warehouse@inventory-management.example</field>
+    </record>
+
+    <!-- Locations -->
+    <record id="demo_location_main_receiving" model="im.location">
+        <field name="name">Receiving</field>
+        <field name="warehouse_id" ref="demo_warehouse_main"/>
+        <field name="type">internal</field>
+        <field name="zone_bin">A-01</field>
+    </record>
+    <record id="demo_location_main_storage" model="im.location">
+        <field name="name">Storage</field>
+        <field name="warehouse_id" ref="demo_warehouse_main"/>
+        <field name="type">internal</field>
+        <field name="zone_bin">A-02</field>
+    </record>
+    <record id="demo_location_north_receiving" model="im.location">
+        <field name="name">Receiving</field>
+        <field name="warehouse_id" ref="demo_warehouse_north"/>
+        <field name="type">internal</field>
+        <field name="zone_bin">B-01</field>
+    </record>
+    <record id="demo_location_north_storage" model="im.location">
+        <field name="name">Storage</field>
+        <field name="warehouse_id" ref="demo_warehouse_north"/>
+        <field name="type">internal</field>
+        <field name="zone_bin">B-02</field>
+    </record>
+
+    <!-- Products: Electronics (1-8) -->
+    <record id="demo_product_1" model="im.product">
+        <field name="name">Wireless Mouse</field>
+        <field name="sku">ELE-0001</field>
+        <field name="category_id" ref="demo_category_electronics"/>
+        <field name="uom">pcs</field>
+        <field name="cost">8.50</field>
+        <field name="sale_price">15.00</field>
+        <field name="reorder_level">20</field>
+        <field name="supplier_id" ref="demo_supplier_1"/>
+    </record>
+    <record id="demo_product_2" model="im.product">
+        <field name="name">USB-C Hub</field>
+        <field name="sku">ELE-0002</field>
+        <field name="category_id" ref="demo_category_electronics"/>
+        <field name="uom">pcs</field>
+        <field name="cost">12.00</field>
+        <field name="sale_price">24.00</field>
+        <field name="reorder_level">15</field>
+        <field name="supplier_id" ref="demo_supplier_1"/>
+    </record>
+    <record id="demo_product_3" model="im.product">
+        <field name="name">Mechanical Keyboard</field>
+        <field name="sku">ELE-0003</field>
+        <field name="category_id" ref="demo_category_electronics"/>
+        <field name="uom">pcs</field>
+        <field name="cost">35.00</field>
+        <field name="sale_price">65.00</field>
+        <field name="reorder_level">10</field>
+        <field name="supplier_id" ref="demo_supplier_4"/>
+    </record>
+    <record id="demo_product_4" model="im.product">
+        <field name="name">27-inch Monitor</field>
+        <field name="sku">ELE-0004</field>
+        <field name="category_id" ref="demo_category_electronics"/>
+        <field name="uom">pcs</field>
+        <field name="cost">140.00</field>
+        <field name="sale_price">220.00</field>
+        <field name="reorder_level">5</field>
+        <field name="supplier_id" ref="demo_supplier_4"/>
+    </record>
+    <record id="demo_product_5" model="im.product">
+        <field name="name">Webcam 1080p</field>
+        <field name="sku">ELE-0005</field>
+        <field name="category_id" ref="demo_category_electronics"/>
+        <field name="uom">pcs</field>
+        <field name="cost">18.00</field>
+        <field name="sale_price">32.00</field>
+        <field name="reorder_level">12</field>
+        <field name="supplier_id" ref="demo_supplier_1"/>
+    </record>
+    <record id="demo_product_6" model="im.product">
+        <field name="name">Bluetooth Speaker</field>
+        <field name="sku">ELE-0006</field>
+        <field name="category_id" ref="demo_category_electronics"/>
+        <field name="uom">pcs</field>
+        <field name="cost">22.00</field>
+        <field name="sale_price">39.00</field>
+        <field name="reorder_level">10</field>
+        <field name="supplier_id" ref="demo_supplier_5"/>
+    </record>
+    <record id="demo_product_7" model="im.product">
+        <field name="name">Laptop Stand</field>
+        <field name="sku">ELE-0007</field>
+        <field name="category_id" ref="demo_category_electronics"/>
+        <field name="uom">pcs</field>
+        <field name="cost">9.00</field>
+        <field name="sale_price">18.00</field>
+        <field name="reorder_level">18</field>
+        <field name="supplier_id" ref="demo_supplier_4"/>
+    </record>
+    <record id="demo_product_8" model="im.product">
+        <field name="name">Portable SSD 1TB</field>
+        <field name="sku">ELE-0008</field>
+        <field name="category_id" ref="demo_category_electronics"/>
+        <field name="uom">pcs</field>
+        <field name="cost">65.00</field>
+        <field name="sale_price">99.00</field>
+        <field name="reorder_level">8</field>
+        <field name="supplier_id" ref="demo_supplier_5"/>
+    </record>
+
+    <!-- Products: Office Supplies (9-15) -->
+    <record id="demo_product_9" model="im.product">
+        <field name="name">A4 Paper Ream</field>
+        <field name="sku">OFF-0001</field>
+        <field name="category_id" ref="demo_category_office"/>
+        <field name="uom">ream</field>
+        <field name="cost">3.20</field>
+        <field name="sale_price">5.50</field>
+        <field name="reorder_level">50</field>
+        <field name="supplier_id" ref="demo_supplier_2"/>
+    </record>
+    <record id="demo_product_10" model="im.product">
+        <field name="name">Ballpoint Pen Box (50pc)</field>
+        <field name="sku">OFF-0002</field>
+        <field name="category_id" ref="demo_category_office"/>
+        <field name="uom">box</field>
+        <field name="cost">4.00</field>
+        <field name="sale_price">7.00</field>
+        <field name="reorder_level">30</field>
+        <field name="supplier_id" ref="demo_supplier_2"/>
+    </record>
+    <record id="demo_product_11" model="im.product">
+        <field name="name">Sticky Notes Pack</field>
+        <field name="sku">OFF-0003</field>
+        <field name="category_id" ref="demo_category_office"/>
+        <field name="uom">pack</field>
+        <field name="cost">1.80</field>
+        <field name="sale_price">3.50</field>
+        <field name="reorder_level">40</field>
+        <field name="supplier_id" ref="demo_supplier_2"/>
+    </record>
+    <record id="demo_product_12" model="im.product">
+        <field name="name">Stapler Heavy Duty</field>
+        <field name="sku">OFF-0004</field>
+        <field name="category_id" ref="demo_category_office"/>
+        <field name="uom">pcs</field>
+        <field name="cost">6.50</field>
+        <field name="sale_price">12.00</field>
+        <field name="reorder_level">15</field>
+        <field name="supplier_id" ref="demo_supplier_5"/>
+    </record>
+    <record id="demo_product_13" model="im.product">
+        <field name="name">Whiteboard Markers Set</field>
+        <field name="sku">OFF-0005</field>
+        <field name="category_id" ref="demo_category_office"/>
+        <field name="uom">set</field>
+        <field name="cost">5.00</field>
+        <field name="sale_price">9.50</field>
+        <field name="reorder_level">20</field>
+        <field name="supplier_id" ref="demo_supplier_2"/>
+    </record>
+    <record id="demo_product_14" model="im.product">
+        <field name="name">Lever Arch File</field>
+        <field name="sku">OFF-0006</field>
+        <field name="category_id" ref="demo_category_office"/>
+        <field name="uom">pcs</field>
+        <field name="cost">2.50</field>
+        <field name="sale_price">4.75</field>
+        <field name="reorder_level">25</field>
+        <field name="supplier_id" ref="demo_supplier_2"/>
+    </record>
+    <record id="demo_product_15" model="im.product">
+        <field name="name">Desk Organizer Tray</field>
+        <field name="sku">OFF-0007</field>
+        <field name="category_id" ref="demo_category_office"/>
+        <field name="uom">pcs</field>
+        <field name="cost">7.00</field>
+        <field name="sale_price">13.50</field>
+        <field name="reorder_level">15</field>
+        <field name="supplier_id" ref="demo_supplier_5"/>
+    </record>
+
+    <!-- Products: Furniture (16-20) -->
+    <record id="demo_product_16" model="im.product">
+        <field name="name">Ergonomic Office Chair</field>
+        <field name="sku">FUR-0001</field>
+        <field name="category_id" ref="demo_category_furniture"/>
+        <field name="uom">pcs</field>
+        <field name="cost">85.00</field>
+        <field name="sale_price">150.00</field>
+        <field name="reorder_level">6</field>
+        <field name="supplier_id" ref="demo_supplier_3"/>
+    </record>
+    <record id="demo_product_17" model="im.product">
+        <field name="name">Adjustable Standing Desk</field>
+        <field name="sku">FUR-0002</field>
+        <field name="category_id" ref="demo_category_furniture"/>
+        <field name="uom">pcs</field>
+        <field name="cost">180.00</field>
+        <field name="sale_price">299.00</field>
+        <field name="reorder_level">4</field>
+        <field name="supplier_id" ref="demo_supplier_3"/>
+    </record>
+    <record id="demo_product_18" model="im.product">
+        <field name="name">Bookshelf 5-Tier</field>
+        <field name="sku">FUR-0003</field>
+        <field name="category_id" ref="demo_category_furniture"/>
+        <field name="uom">pcs</field>
+        <field name="cost">60.00</field>
+        <field name="sale_price">110.00</field>
+        <field name="reorder_level">6</field>
+        <field name="supplier_id" ref="demo_supplier_3"/>
+    </record>
+    <record id="demo_product_19" model="im.product">
+        <field name="name">Filing Cabinet 3-Drawer</field>
+        <field name="sku">FUR-0004</field>
+        <field name="category_id" ref="demo_category_furniture"/>
+        <field name="uom">pcs</field>
+        <field name="cost">70.00</field>
+        <field name="sale_price">125.00</field>
+        <field name="reorder_level">5</field>
+        <field name="supplier_id" ref="demo_supplier_3"/>
+    </record>
+    <record id="demo_product_20" model="im.product">
+        <field name="name">Conference Table 6-Seater</field>
+        <field name="sku">FUR-0005</field>
+        <field name="category_id" ref="demo_category_furniture"/>
+        <field name="uom">pcs</field>
+        <field name="cost">250.00</field>
+        <field name="sale_price">420.00</field>
+        <field name="reorder_level">2</field>
+        <field name="supplier_id" ref="demo_supplier_3"/>
+    </record>
+
+</odoo>

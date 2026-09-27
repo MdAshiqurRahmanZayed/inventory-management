@@ -20,6 +20,14 @@ yet). See the project README and OpenSpec change history for progress.
     "data": [
         "security/ir.model.access.csv",
         "views/inventory_management_menu.xml",
+        "views/im_product_category_views.xml",
+        "views/im_product_views.xml",
+        "views/res_partner_views.xml",
+        "views/im_warehouse_views.xml",
+        "views/im_location_views.xml",
+    ],
+    "demo": [
+        "demo/im_demo_data.xml",
     ],
     "installable": True,
     "application": True,

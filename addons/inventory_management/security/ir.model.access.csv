@@ -1,2 +1,6 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_im_welcome_user,im.welcome.user,model_im_welcome,base.group_user,1,1,1,1
+access_im_product_category_system,im.product.category.system,model_im_product_category,base.group_system,1,1,1,1
+access_im_product_system,im.product.system,model_im_product,base.group_system,1,1,1,1
+access_im_warehouse_system,im.warehouse.system,model_im_warehouse,base.group_system,1,1,1,1
+access_im_location_system,im.location.system,model_im_location,base.group_system,1,1,1,1
