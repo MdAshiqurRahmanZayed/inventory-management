@@ -4,7 +4,7 @@ An Odoo inventory app (`inventory_management`) with its own OWL dashboard, plus 
 
 ## Status: Ongoing / Not Complete
 
-This is an active, in-progress portfolio project. It is **not** production-ready. Right now the repo only contains the project scaffold — an installable but empty Odoo module and a Docker dev environment. Business logic (products, orders, moves, stock, dashboard, MCP connector) lands in later changes.
+This is an active, in-progress project. It is **not** production-ready. Core data models (products, categories, partner roles, warehouses, locations) and a data-backed dashboard are implemented; purchasing, sales/adjustments, real role-based access, and the MCP connector land in later changes.
 
 ## Naming note
 
@@ -290,7 +290,7 @@ Inventory shortcuts sit on top so the AI needs fewer steps: `get_stock`, `list_l
 
 ### Testing and quality
 
-Reviewers judge a portfolio repo in about two minutes, so tests and the README matter as much as features.
+Reviewers judge a repo in about two minutes, so tests and the README matter as much as features.
 
 - **Odoo tests** (`TransactionCase`): purchase order to receipt, sales order to shipment and delivery, move flow and states, quant totals after each move, no negative stock, access for User versus Manager, the cron raising and closing alerts, the adjust wizard.
 - **Dashboard test**: one OWL test (Hoot, Odoo's JS test framework) that the dashboard loads its figures.
@@ -332,7 +332,7 @@ Requires Docker and Docker Compose.
    First run pulls the `odoo:19.0` and `postgres:16` images, which can take a few minutes.
 4. Open Odoo in your browser at [http://localhost:8069](http://localhost:8069) and create/select a database. If port 8069 is already used by another project, edit the host-side port directly in `docker-compose.yml`'s `ports:` section (e.g. `"8169:8069"`).
 5. Go to **Apps**, click **Update Apps List**, remove the "Apps" filter, search for **"Inventory Management"**, and click **Install**.
-6. Confirm the module installs with no errors — this scaffold ships no business logic yet, so installing it just adds an empty "Inventory Management" app to the menu.
+6. Confirm the module installs with no errors — `--with-demo` loads sample products, categories, warehouses, locations, and contacts, and the dashboard shows real counts on first load.
 7. Optional: search for **"Web Responsive"** and install it too, for the icon-grid app launcher (click the waffle icon top-left after installing).
 
 To stop the environment: `docker compose down` (add `-v` to also drop the database volume).
