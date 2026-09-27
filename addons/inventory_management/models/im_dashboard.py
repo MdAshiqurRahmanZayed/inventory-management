@@ -1,4 +1,5 @@
-from odoo import api, models
+from odoo import api
+from odoo import models
 
 
 class ImDashboard(models.AbstractModel):
