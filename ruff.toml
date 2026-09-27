@@ -1,0 +1,22 @@
+# Only lint our own code. extra-addons/ is vendored third-party (OCA) source,
+# not ours to lint or fix.
+extend-exclude = ["extra-addons"]
+
+line-length = 100
+target-version = "py312"
+
+[lint]
+select = ["E", "F", "W", "I"]
+ignore = [
+    "E501", # long lines: Odoo XML/field defs often run long, not worth enforcing
+]
+
+[lint.per-file-ignores]
+# Odoo __init__.py files use `from . import x` purely for its side effect
+# (registering the module) — the name is never meant to be used directly.
+"__init__.py" = ["F401"]
+
+[lint.isort]
+# One import per line — keeps `__init__.py` re-exports diffing cleanly
+# (one line added per new model/test file) and is consistent everywhere.
+force-single-line = true

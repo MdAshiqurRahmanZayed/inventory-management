@@ -8,12 +8,18 @@ services:
       POSTGRES_DB: postgres
     volumes:
       - odoo-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U odoo"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     restart: unless-stopped
 
   odoo:
     image: odoo:19.0
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     ports:
       # Change the host-side port here directly if 8069 is already used by
       # another local project (e.g. "8169:8069").

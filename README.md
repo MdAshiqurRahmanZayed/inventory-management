@@ -346,6 +346,20 @@ To stop the environment: `docker compose down` (add `-v` to also drop the databa
 - `scripts/fetch-extra-addons.sh` — (re-)fetches everything under `extra-addons/`.
 - `docker-compose.yml`, `odoo.conf.example` — local dev environment (copy `odoo.conf.example` to `odoo.conf`, gitignored; it's the single place DB credentials, admin password, and addons path are configured). Mounts both `addons/` and `extra-addons/` into the container at `/mnt/addons` and `/mnt/extra-addons` respectively.
 - `openspec/` — [OpenSpec](https://openspec.dev) planning artifacts (proposals, specs, design, tasks) driving this project's development.
+- `ruff.toml` — lint config for this module's Python code (excludes vendored `extra-addons/`).
+- `.github/workflows/ci.yml` — CI: ruff lint + `inventory_management`'s tests run against Postgres via Docker Compose, on every push/PR to `main`.
+
+## CI
+
+On every push/PR to `main`:
+- **Ruff lint** — `ruff check` against `addons/inventory_management` (vendored `extra-addons/` excluded).
+- **Odoo tests** — starts Postgres (waits for its healthcheck), then runs `inventory_management`'s test suite headlessly via `docker compose run`, isolated with `--test-tags /inventory_management`.
+
+Run the same checks locally:
+```bash
+ruff check
+docker compose run --rm odoo odoo -d ci_test -i inventory_management --test-enable --test-tags /inventory_management --stop-after-init --http-port=8169
+```
 
 ## Roadmap
 

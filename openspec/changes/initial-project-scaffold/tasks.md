@@ -48,3 +48,11 @@
 - [x] 6.5 Update `odoo.conf.example`'s `addons_path` to list both `/mnt/addons` and `/mnt/extra-addons`
 - [x] 6.6 Update README: new "Addons layout" section, fetch-script step added to the Docker setup instructions, repository layout list updated
 - [x] 6.7 Verified: recreated containers with new mounts, confirmed both paths visible inside the container, upgraded both modules headlessly with 0 errors; ran the fetch script from a clean `extra-addons/` and confirmed it reproduces an identical module tree
+
+## 7. CI: ruff + Odoo tests
+
+- [x] 7.1 Add `ruff.toml`: lints only `addons/` (excludes vendored `extra-addons/`); `__init__.py` re-export imports exempted from F401 (standard Odoo pattern); `force-single-line` isort for clean one-line-per-model diffs
+- [x] 7.2 Add Postgres healthcheck (`pg_isready`) to `docker-compose.yml`'s `db` service; `odoo` service now depends on `db` being healthy, not just started (fixes a race the earlier code review flagged)
+- [x] 7.3 Add `.github/workflows/ci.yml`: `ruff` job (lint) + `odoo-tests` job (starts Postgres, waits for healthy, runs `inventory_management`'s tests via `docker compose run --rm`, isolated with `--test-tags`), on push/PR to `main`
+- [x] 7.4 Document CI + local-equivalent commands in README
+- [x] 7.5 Verified locally: `ruff check` passes clean after fixing real issues found (unsorted imports); `docker compose ps` shows `db` healthy before `odoo` starts; module still installs with 0 errors after import reformatting; workflow YAML syntax validated
