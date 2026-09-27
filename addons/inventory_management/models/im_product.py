@@ -14,7 +14,7 @@ class ImProduct(models.Model):
 
     name = fields.Char(required=True)
     sku = fields.Char(string="SKU", required=True)
-    description = fields.Text()
+    description = fields.Html()
     category_id = fields.Many2one("im.product.category", string="Category", required=True)
     uom = fields.Char(string="Unit of Measure")
     cost = fields.Float()

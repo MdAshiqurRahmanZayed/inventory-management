@@ -48,3 +48,10 @@
 - `partner_role`'s default label "Role" collided with `res.users`' own "Role" field label; renamed to "Business Role".
 - `res_partner_views.xml`'s list-view xpath anchored on a `name` field that doesn't exist in Odoo 19's `base.view_partner_tree` (it uses `display_name` instead) — fixed the anchor, verified against the actual base view XML before retrying.
 - A stray `docker compose run --service-ports` container from an earlier manual session held port 8069 and cached a stale database list, causing "Database not found" for newly created test databases — identified via `docker ps`, removed, and the proper `docker compose up -d odoo` service restarted.
+
+## 8. Description fields as HTML (for future website use)
+
+- [x] 8.1 Add `description = fields.Html()` to `im.product.category` (new field)
+- [x] 8.2 Change `im.product.description` from `fields.Text()` to `fields.Html()`
+- [x] 8.3 Update both form views: description moved out of `<group>` (Html fields need full-width, not label:value rows) with a placeholder
+- [x] 8.4 Verified: plain `-u` upgrade of `inventory_dev` succeeded with 0 errors (no existing demo data set `description`, so the Text→Html type change had nothing to migrate); all 12 tests still pass

@@ -8,3 +8,4 @@ class ImProductCategory(models.Model):
     _order = "name"
 
     name = fields.Char(required=True)
+    description = fields.Html()

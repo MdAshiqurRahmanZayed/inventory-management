@@ -19,6 +19,7 @@
                     <group>
                         <field name="name"/>
                     </group>
+                    <field name="description" placeholder="Category description..."/>
                 </sheet>
             </form>
         </field>
