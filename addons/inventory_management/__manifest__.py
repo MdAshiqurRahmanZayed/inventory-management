@@ -11,8 +11,9 @@ A standalone Odoo inventory app covering products, suppliers/customers,
 warehouses, purchase and sales orders, stock moves, adjustments and
 low-stock alerts, with an OWL dashboard.
 
-This module is currently in an early scaffold state (no business logic
-yet). See the project README and OpenSpec change history for progress.
+Core models, purchasing, and stock moves/quants are implemented. Sales,
+adjustments, role-based access, and the MCP connector are still in
+progress — see the project README and OpenSpec change history.
 """,
     "author": "Ashiqur Zayed",
     "license": "LGPL-3",
@@ -25,6 +26,9 @@ yet). See the project README and OpenSpec change history for progress.
         "views/res_partner_views.xml",
         "views/im_warehouse_views.xml",
         "views/im_location_views.xml",
+        "views/im_purchase_order_views.xml",
+        "views/im_move_views.xml",
+        "views/im_quant_views.xml",
     ],
     "demo": [
         "demo/im_demo_data.xml",
