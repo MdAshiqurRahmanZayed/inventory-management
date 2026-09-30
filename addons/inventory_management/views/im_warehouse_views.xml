@@ -23,6 +23,7 @@
                         <field name="address"/>
                         <field name="capacity"/>
                         <field name="email"/>
+                        <field name="default_receiving_location_id"/>
                     </group>
                     <notebook>
                         <page string="Locations">
@@ -31,6 +32,7 @@
                                     <field name="name"/>
                                     <field name="type"/>
                                     <field name="zone_bin"/>
+                                    <field name="is_default_receiving"/>
                                 </list>
                             </field>
                         </page>
