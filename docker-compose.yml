@@ -16,7 +16,10 @@ services:
     restart: unless-stopped
 
   odoo:
-    image: odoo:19.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: inventory-management-odoo:19.0
     depends_on:
       db:
         condition: service_healthy

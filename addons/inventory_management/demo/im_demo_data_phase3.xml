@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!-- Flag the receiving dock as the shipping dock too, on each demo warehouse
+         (small warehouse, one dock does both) -->
+    <record id="demo_location_main_receiving" model="im.location">
+        <field name="is_default_shipping">True</field>
+    </record>
+    <record id="demo_location_north_receiving" model="im.location">
+        <field name="is_default_shipping">True</field>
+    </record>
+
+    <!-- Sale orders: one Draft, one Confirmed (awaiting delivery), one Done -->
+    <record id="demo_so_draft" model="im.sale.order">
+        <field name="customer_id" ref="demo_customer_1"/>
+        <field name="warehouse_id" ref="demo_warehouse_north"/>
+        <field name="expected_date" eval="(DateTime.today() + timedelta(days=5)).strftime('%Y-%m-%d')"/>
+        <field name="line_ids" eval="[(0, 0, {'product_id': ref('demo_product_9'), 'quantity': 10, 'unit_price': 5.50}),
+                                       (0, 0, {'product_id': ref('demo_product_10'), 'quantity': 6, 'unit_price': 7.00})]"/>
+    </record>
+
+    <record id="demo_so_confirmed" model="im.sale.order">
+        <field name="customer_id" ref="demo_customer_2"/>
+        <field name="warehouse_id" ref="demo_warehouse_north"/>
+        <field name="expected_date" eval="(DateTime.today() + timedelta(days=2)).strftime('%Y-%m-%d')"/>
+        <field name="line_ids" eval="[(0, 0, {'product_id': ref('demo_product_9'), 'quantity': 15, 'unit_price': 5.50})]"/>
+    </record>
+    <function model="im.sale.order" name="action_confirm" eval="[[ref('demo_so_confirmed')]]"/>
+
+    <record id="demo_so_done" model="im.sale.order">
+        <field name="customer_id" ref="demo_customer_3"/>
+        <field name="warehouse_id" ref="demo_warehouse_north"/>
+        <field name="expected_date" eval="(DateTime.today() - timedelta(days=1)).strftime('%Y-%m-%d')"/>
+        <field name="line_ids" eval="[(0, 0, {'product_id': ref('demo_product_10'), 'quantity': 10, 'unit_price': 7.00})]"/>
+    </record>
+    <function model="im.sale.order" name="action_confirm" eval="[[ref('demo_so_done')]]"/>
+    <function model="im.sale.order" name="action_deliver_all" eval="[[ref('demo_so_done')]]"/>
+    <function model="im.sale.order" name="action_done" eval="[[ref('demo_so_done')]]"/>
+
+    <!-- Stock adjustments: one Increase, one Decrease, both confirmed (audit trail) -->
+    <record id="demo_adjustment_increase" model="im.adjustment">
+        <field name="product_id" ref="demo_product_1"/>
+        <field name="location_id" ref="demo_location_main_storage"/>
+        <field name="adjustment_type">increase</field>
+        <field name="quantity">12</field>
+        <field name="reason">Physical count found 12 extra units not yet in the system</field>
+    </record>
+    <function model="im.adjustment" name="action_confirm" eval="[[ref('demo_adjustment_increase')]]"/>
+
+    <record id="demo_adjustment_decrease" model="im.adjustment">
+        <field name="product_id" ref="demo_product_9"/>
+        <field name="location_id" ref="demo_location_north_receiving"/>
+        <field name="adjustment_type">decrease</field>
+        <field name="quantity">3</field>
+        <field name="reason">3 units damaged in transit, written off</field>
+    </record>
+    <function model="im.adjustment" name="action_confirm" eval="[[ref('demo_adjustment_decrease')]]"/>
+
+</odoo>

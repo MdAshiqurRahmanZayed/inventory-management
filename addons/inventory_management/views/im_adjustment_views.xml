@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="im_adjustment_view_list" model="ir.ui.view">
+        <field name="name">im.adjustment.list</field>
+        <field name="model">im.adjustment</field>
+        <field name="arch" type="xml">
+            <list string="Stock Adjustments">
+                <field name="product_id"/>
+                <field name="location_id"/>
+                <field name="adjustment_type"/>
+                <field name="quantity"/>
+                <field name="reason"/>
+                <field name="user_id"/>
+                <field name="date"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="im_adjustment_view_form" model="ir.ui.view">
+        <field name="name">im.adjustment.form</field>
+        <field name="model">im.adjustment</field>
+        <field name="arch" type="xml">
+            <form string="Stock Adjustment">
+                <header>
+                    <button name="action_confirm" string="Confirm" type="object" invisible="state != 'draft'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="product_id" readonly="state != 'draft'"/>
+                        <field name="location_id" readonly="state != 'draft'"/>
+                        <field name="adjustment_type" readonly="state != 'draft'"/>
+                        <field name="quantity" readonly="state != 'draft'"/>
+                        <field name="reason"/>
+                        <field name="user_id" readonly="1"/>
+                        <field name="date"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_im_adjustment" model="ir.actions.act_window">
+        <field name="name">Stock Adjustments</field>
+        <field name="res_model">im.adjustment</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem
+        id="menu_im_adjustment"
+        name="Stock Adjustments"
+        parent="menu_im_inventory_group"
+        action="action_im_adjustment"
+        sequence="50"/>
+</odoo>

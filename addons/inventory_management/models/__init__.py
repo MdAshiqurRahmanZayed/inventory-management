@@ -1,3 +1,4 @@
+from . import im_adjustment
 from . import im_dashboard
 from . import im_location
 from . import im_move
@@ -6,5 +7,8 @@ from . import im_product_category
 from . import im_purchase_line
 from . import im_purchase_order
 from . import im_quant
+from . import im_sale_line
+from . import im_sale_order
+from . import im_shipment
 from . import im_warehouse
 from . import res_partner

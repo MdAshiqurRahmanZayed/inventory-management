@@ -34,7 +34,7 @@
     <menuitem
         id="menu_im_product_category"
         name="Product Categories"
-        parent="menu_inventory_management_root"
+        parent="menu_im_products_group"
         action="action_im_product_category"
         sequence="20"/>
 </odoo>

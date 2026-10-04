@@ -11,6 +11,8 @@
                 <field name="dest_id"/>
                 <field name="state"/>
                 <field name="purchase_line_id"/>
+                <field name="shipment_id"/>
+                <field name="adjustment_id"/>
             </list>
         </field>
     </record>
@@ -32,6 +34,8 @@
                             <field name="product_id"/>
                             <field name="quantity"/>
                             <field name="purchase_line_id"/>
+                            <field name="shipment_id"/>
+                            <field name="adjustment_id"/>
                         </group>
                         <group>
                             <field name="source_id"/>
@@ -54,7 +58,7 @@
     <menuitem
         id="menu_im_move"
         name="Stock Moves"
-        parent="menu_inventory_management_root"
+        parent="menu_im_inventory_group"
         action="action_im_move"
-        sequence="60"/>
+        sequence="30"/>
 </odoo>

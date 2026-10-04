@@ -49,7 +49,7 @@
     <menuitem
         id="menu_im_product"
         name="Products"
-        parent="menu_inventory_management_root"
+        parent="menu_im_products_group"
         action="action_im_product"
         sequence="10"/>
 </odoo>

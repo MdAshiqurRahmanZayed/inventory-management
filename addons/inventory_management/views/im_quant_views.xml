@@ -21,7 +21,7 @@
     <menuitem
         id="menu_im_quant"
         name="Stock Quants"
-        parent="menu_inventory_management_root"
+        parent="menu_im_inventory_group"
         action="action_im_quant"
-        sequence="70"/>
+        sequence="40"/>
 </odoo>

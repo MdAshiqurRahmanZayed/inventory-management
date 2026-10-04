@@ -76,3 +76,41 @@ class TestStock(TransactionCase):
     def test_move_requires_a_location(self):
         with self.assertRaises(ValidationError):
             self.env["im.move"].create({"product_id": self.product.id, "quantity": 1})
+
+    def test_move_rejects_more_than_one_origin(self):
+        order = self.env["im.purchase.order"].create(
+            {
+                "supplier_id": self.env["res.partner"]
+                .create({"name": "Test Supplier", "partner_role": "supplier"})
+                .id,
+                "warehouse_id": self.warehouse.id,
+            }
+        )
+        line = self.env["im.purchase.line"].create(
+            {"order_id": order.id, "product_id": self.product.id, "quantity": 1}
+        )
+        shipment = self.env["im.shipment"].create(
+            {
+                "sale_order_id": self.env["im.sale.order"]
+                .create(
+                    {
+                        "customer_id": self.env["res.partner"]
+                        .create({"name": "Test Customer", "partner_role": "customer"})
+                        .id,
+                        "warehouse_id": self.warehouse.id,
+                    }
+                )
+                .id,
+                "warehouse_id": self.warehouse.id,
+            }
+        )
+        with self.assertRaises(ValidationError):
+            self.env["im.move"].create(
+                {
+                    "product_id": self.product.id,
+                    "quantity": 1,
+                    "dest_id": self.location_a.id,
+                    "purchase_line_id": line.id,
+                    "shipment_id": shipment.id,
+                }
+            )
