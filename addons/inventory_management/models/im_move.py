@@ -16,7 +16,18 @@ class ImMove(models.Model):
     _name = "im.move"
     _description = "Stock Move"
     _order = "id desc"
+    _rec_name = "name"
 
+    name = fields.Char(
+        string="Move",
+        compute="_compute_name",
+        store=True,
+    )
+    number = fields.Char(
+        string="SM Number",
+        readonly=True,
+        default=lambda self: self.env["ir.sequence"].next_by_code("im.move"),
+    )
     product_id = fields.Many2one("im.product", string="Product", required=True)
     quantity = fields.Float(required=True)
     source_id = fields.Many2one("im.location", string="Source Location")
@@ -34,6 +45,14 @@ class ImMove(models.Model):
     done_date = fields.Datetime(readonly=True)
     user_id = fields.Many2one("res.users", string="Done By", readonly=True)
     purchase_line_id = fields.Many2one("im.purchase.line", string="Purchase Line")
+
+    @api.depends("number", "product_id", "quantity")
+    def _compute_name(self):
+        for record in self:
+            if record.number and record.product_id:
+                record.name = f"{record.number} {record.product_id.name} x{record.quantity}"
+            else:
+                record.name = "New"
 
     @api.constrains("source_id", "dest_id")
     def _check_has_a_location(self):
