@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="im_move_view_list" model="ir.ui.view">
+        <field name="name">im.move.list</field>
+        <field name="model">im.move</field>
+        <field name="arch" type="xml">
+            <list string="Stock Moves">
+                <field name="product_id"/>
+                <field name="quantity"/>
+                <field name="source_id"/>
+                <field name="dest_id"/>
+                <field name="state"/>
+                <field name="purchase_line_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="im_move_view_form" model="ir.ui.view">
+        <field name="name">im.move.form</field>
+        <field name="model">im.move</field>
+        <field name="arch" type="xml">
+            <form string="Stock Move">
+                <header>
+                    <button name="action_confirm" string="Confirm" type="object" invisible="state != 'draft'"/>
+                    <button name="action_done" string="Mark Done" type="object" invisible="state != 'confirmed'"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state in ('done', 'cancelled')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="product_id"/>
+                            <field name="quantity"/>
+                            <field name="purchase_line_id"/>
+                        </group>
+                        <group>
+                            <field name="source_id"/>
+                            <field name="dest_id"/>
+                            <field name="done_date" readonly="1"/>
+                            <field name="user_id" readonly="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_im_move" model="ir.actions.act_window">
+        <field name="name">Stock Moves</field>
+        <field name="res_model">im.move</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem
+        id="menu_im_move"
+        name="Stock Moves"
+        parent="menu_inventory_management_root"
+        action="action_im_move"
+        sequence="60"/>
+</odoo>
