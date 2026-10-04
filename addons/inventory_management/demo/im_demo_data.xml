@@ -111,6 +111,7 @@
         <field name="warehouse_id" ref="demo_warehouse_main"/>
         <field name="type">internal</field>
         <field name="zone_bin">A-01</field>
+        <field name="is_default_receiving">True</field>
     </record>
     <record id="demo_location_main_storage" model="im.location">
         <field name="name">Storage</field>
@@ -123,6 +124,7 @@
         <field name="warehouse_id" ref="demo_warehouse_north"/>
         <field name="type">internal</field>
         <field name="zone_bin">B-01</field>
+        <field name="is_default_receiving">True</field>
     </record>
     <record id="demo_location_north_storage" model="im.location">
         <field name="name">Storage</field>
@@ -336,5 +338,34 @@
         <field name="reorder_level">2</field>
         <field name="supplier_id" ref="demo_supplier_3"/>
     </record>
+
+    <!-- Purchase orders: one Draft, one Confirmed (awaiting receipt), one Done -->
+    <record id="demo_po_draft" model="im.purchase.order">
+        <field name="supplier_id" ref="demo_supplier_1"/>
+        <field name="warehouse_id" ref="demo_warehouse_main"/>
+        <field name="expected_date" eval="(DateTime.today() + timedelta(days=7)).strftime('%Y-%m-%d')"/>
+        <field name="line_ids" eval="[(0, 0, {'product_id': ref('demo_product_1'), 'quantity': 50, 'unit_cost': 8.50}),
+                                       (0, 0, {'product_id': ref('demo_product_2'), 'quantity': 30, 'unit_cost': 12.00})]"/>
+    </record>
+
+    <record id="demo_po_confirmed" model="im.purchase.order">
+        <field name="supplier_id" ref="demo_supplier_4"/>
+        <field name="warehouse_id" ref="demo_warehouse_main"/>
+        <field name="expected_date" eval="(DateTime.today() + timedelta(days=3)).strftime('%Y-%m-%d')"/>
+        <field name="line_ids" eval="[(0, 0, {'product_id': ref('demo_product_3'), 'quantity': 20, 'unit_cost': 35.00}),
+                                       (0, 0, {'product_id': ref('demo_product_4'), 'quantity': 10, 'unit_cost': 140.00})]"/>
+    </record>
+    <function model="im.purchase.order" name="action_confirm" eval="[[ref('demo_po_confirmed')]]"/>
+
+    <record id="demo_po_done" model="im.purchase.order">
+        <field name="supplier_id" ref="demo_supplier_2"/>
+        <field name="warehouse_id" ref="demo_warehouse_north"/>
+        <field name="expected_date" eval="(DateTime.today() - timedelta(days=2)).strftime('%Y-%m-%d')"/>
+        <field name="line_ids" eval="[(0, 0, {'product_id': ref('demo_product_9'), 'quantity': 100, 'unit_cost': 3.20}),
+                                       (0, 0, {'product_id': ref('demo_product_10'), 'quantity': 60, 'unit_cost': 4.00})]"/>
+    </record>
+    <function model="im.purchase.order" name="action_confirm" eval="[[ref('demo_po_done')]]"/>
+    <function model="im.purchase.order" name="action_receive_all" eval="[[ref('demo_po_done')]]"/>
+    <function model="im.purchase.order" name="action_done" eval="[[ref('demo_po_done')]]"/>
 
 </odoo>

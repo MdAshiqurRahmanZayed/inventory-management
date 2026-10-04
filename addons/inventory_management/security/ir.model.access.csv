@@ -4,3 +4,7 @@ access_im_product_category_system,im.product.category.system,model_im_product_ca
 access_im_product_system,im.product.system,model_im_product,base.group_system,1,1,1,1
 access_im_warehouse_system,im.warehouse.system,model_im_warehouse,base.group_system,1,1,1,1
 access_im_location_system,im.location.system,model_im_location,base.group_system,1,1,1,1
+access_im_purchase_order_system,im.purchase.order.system,model_im_purchase_order,base.group_system,1,1,1,1
+access_im_purchase_line_system,im.purchase.line.system,model_im_purchase_line,base.group_system,1,1,1,1
+access_im_move_system,im.move.system,model_im_move,base.group_system,1,1,1,1
+access_im_quant_system,im.quant.system,model_im_quant,base.group_system,1,0,0,0
