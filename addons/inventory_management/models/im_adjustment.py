@@ -10,7 +10,13 @@ class ImAdjustment(models.Model):
     _name = "im.adjustment"
     _description = "Stock Adjustment"
     _order = "date desc, id desc"
+    _rec_name = "name"
 
+    name = fields.Char(
+        string="Adjustment",
+        compute="_compute_name",
+        store=True,
+    )
     product_id = fields.Many2one("im.product", string="Product", required=True)
     location_id = fields.Many2one(
         "im.location",
@@ -33,6 +39,17 @@ class ImAdjustment(models.Model):
         default="draft",
     )
     move_ids = fields.One2many("im.move", "adjustment_id", string="Moves")
+
+    @api.depends("product_id", "location_id", "adjustment_type", "quantity")
+    def _compute_name(self):
+        for record in self:
+            if record.product_id and record.location_id:
+                record.name = (
+                    f"{record.adjustment_type.capitalize() if record.adjustment_type else ''} "
+                    f"{record.product_id.name} x{record.quantity} @ {record.location_id.name}"
+                )
+            else:
+                record.name = "New"
 
     @api.constrains("quantity")
     def _check_quantity_positive(self):

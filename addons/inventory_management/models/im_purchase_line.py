@@ -7,13 +7,27 @@ from odoo.exceptions import ValidationError
 class ImPurchaseLine(models.Model):
     _name = "im.purchase.line"
     _description = "Purchase Order Line"
+    _rec_name = "name"
 
+    name = fields.Char(
+        string="Line",
+        compute="_compute_name",
+        store=True,
+    )
     order_id = fields.Many2one("im.purchase.order", string="Order", required=True, ondelete="cascade")
     product_id = fields.Many2one("im.product", string="Product", required=True)
     quantity = fields.Float(required=True)
     unit_cost = fields.Float()
     subtotal = fields.Float(compute="_compute_subtotal", store=True)
     move_ids = fields.One2many("im.move", "purchase_line_id", string="Moves")
+
+    @api.depends("order_id", "product_id", "quantity")
+    def _compute_name(self):
+        for record in self:
+            if record.order_id and record.product_id:
+                record.name = f"{record.order_id.name} - {record.product_id.name} x{record.quantity}"
+            else:
+                record.name = "New"
 
     @api.depends("quantity", "unit_cost")
     def _compute_subtotal(self):
