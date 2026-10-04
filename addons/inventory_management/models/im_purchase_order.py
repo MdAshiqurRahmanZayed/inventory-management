@@ -15,7 +15,18 @@ class ImPurchaseOrder(models.Model):
     _name = "im.purchase.order"
     _description = "Purchase Order"
     _order = "order_date desc, id desc"
+    _rec_name = "name"
 
+    name = fields.Char(
+        string="PO",
+        compute="_compute_name",
+        store=True,
+    )
+    number = fields.Char(
+        string="PO Number",
+        readonly=True,
+        default=lambda self: self.env["ir.sequence"].next_by_code("im.purchase.order"),
+    )
     supplier_id = fields.Many2one(
         "res.partner",
         string="Supplier",
@@ -40,6 +51,14 @@ class ImPurchaseOrder(models.Model):
     move_ids = fields.One2many(
         "im.move", string="Moves", compute="_compute_move_ids"
     )
+
+    @api.depends("number", "supplier_id", "warehouse_id")
+    def _compute_name(self):
+        for record in self:
+            if record.number and record.supplier_id and record.warehouse_id:
+                record.name = f"{record.number} {record.supplier_id.name}-{record.warehouse_id.name}"
+            else:
+                record.name = "New"
 
     @api.depends("line_ids.subtotal")
     def _compute_amount_total(self):

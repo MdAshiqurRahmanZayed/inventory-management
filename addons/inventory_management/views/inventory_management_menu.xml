@@ -8,7 +8,7 @@
     <menuitem
         id="menu_inventory_management_root"
         name="Inventory Management"
-        sequence="10"
+        sequence="1"
         web_icon="inventory_management,static/description/icon.png"
         action="action_inventory_management_root"/>
 </odoo>
