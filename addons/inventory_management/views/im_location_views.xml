@@ -9,7 +9,6 @@
                 <field name="warehouse_id"/>
                 <field name="type"/>
                 <field name="zone_bin"/>
-                <field name="is_default_receiving"/>
             </list>
         </field>
     </record>
@@ -25,7 +24,6 @@
                         <field name="warehouse_id"/>
                         <field name="type"/>
                         <field name="zone_bin"/>
-                        <field name="is_default_receiving"/>
                     </group>
                 </sheet>
             </form>

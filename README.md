@@ -339,28 +339,6 @@ To stop the environment: `docker compose down` (add `-v` to also drop the databa
 
 **Security note:** `odoo.conf` (copied from `odoo.conf.example`, gitignored) has placeholder `admin_passwd`/DB credentials. Change them if you ever run this somewhere reachable beyond your own machine.
 
-## Running tests
-
-Use `docker compose run --rm`, not `exec` — `run` spins up a one-off container without publishing port 8069, so it won't conflict with `docker compose up`'s already-running server (an `exec` into the running container tries to bind the same port a second time and fails with "Address already in use").
-
-```bash
-# Full module test suite, against a disposable test db:
-docker compose run --rm odoo odoo -d ci_test -i inventory_management \
-  --test-enable --test-tags /inventory_management \
-  --stop-after-init --http-port=8169
-
-# Re-run against an existing db without reinstalling:
-docker compose run --rm odoo odoo -d ci_test \
-  --test-tags /inventory_management --stop-after-init --http-port=8169
-
-# One test class/method only:
-docker compose run --rm odoo odoo -d ci_test \
-  --test-tags /inventory_management:TestPurchasing.test_receive_all_marks_moves_done \
-  --stop-after-init --http-port=8169
-```
-
-`--http-port=8169` is belt-and-suspenders (picks a port nothing else binds); combined with `run` instead of `exec`, it's what lets this work alongside a live `docker compose up` session. No need to stop the dev server or kill local processes first.
-
 ## Repository layout
 
 - `addons/inventory_management/` — this project's own Odoo module source. Committed.

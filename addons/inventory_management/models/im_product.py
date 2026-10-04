@@ -1,4 +1,3 @@
-from odoo import api
 from odoo import fields
 from odoo import models
 
@@ -26,15 +25,4 @@ class ImProduct(models.Model):
         string="Supplier",
         domain=[("partner_role", "in", ["supplier", "both"])],
     )
-    qty_on_hand = fields.Float(compute="_compute_qty_on_hand")
-
-    @api.depends()
-    def _compute_qty_on_hand(self):
-        quant_groups = self.env["im.quant"]._read_group(
-            [("product_id", "in", self.ids)],
-            groupby=["product_id"],
-            aggregates=["quantity:sum"],
-        )
-        totals = {product.id: total for product, total in quant_groups}
-        for product in self:
-            product.qty_on_hand = totals.get(product.id, 0.0)
+    qty_on_hand = fields.Float(default=0.0)
