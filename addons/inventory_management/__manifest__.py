@@ -19,6 +19,7 @@ progress — see the project README and OpenSpec change history.
     "license": "LGPL-3",
     "depends": ["base", "mail"],
     "data": [
+        "data/ir_sequence.xml",
         "security/ir.model.access.csv",
         "views/inventory_management_menu.xml",
         "views/im_product_category_views.xml",

@@ -33,6 +33,9 @@ Odoo 19 has no built-in lightweight state-machine mixin worth adding as a depend
 **Purchase order confirm creates moves in a single transaction; no partial-confirm state.**
 Confirming validates "has at least one line" first, then creates all receipt moves and flips `state` to Confirmed together. If move creation fails partway, the whole confirm rolls back (standard ORM transaction behavior) — there is no code path that leaves an order Confirmed with fewer moves than lines.
 
+**Sequence-backed display names for `im.purchase.order` and `im.move`.**
+`im.purchase.order.number` auto-generates via `ir.sequence` as "PO-0001", "PO-0002", etc.; the computed `name` field displays as "PO-0001 Supplier-Warehouse" (e.g., "PO-0001 Acme Corp-Main Warehouse"). Similarly, `im.move.number` generates as "SM-00001", and `name` displays as "SM-00001 Product xQty" (e.g., "SM-00001 Laptop x5"). Both sequences are noupdate=1 in demo data so they persist across module reinstalls. Rationale: tells the user a stable reference number plus context at a glance; replaces opaque "im.purchase.order,2" listings in dropdowns and list views.
+
 ## Risks / Trade-offs
 
 - [Risk] Non-stored `qty_on_hand` could get slow if demo data grows much larger. → Mitigation: switch to stored+computed with `depends` on `im.quant` writes; no spec-level change needed since the requirement is the value, not the storage strategy.
