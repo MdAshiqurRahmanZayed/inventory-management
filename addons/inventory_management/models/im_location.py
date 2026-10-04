@@ -18,6 +18,7 @@ class ImLocation(models.Model):
     )
     zone_bin = fields.Char(string="Zone / Bin")
     is_default_receiving = fields.Boolean(string="Default Receiving Location")
+    is_default_shipping = fields.Boolean(string="Default Shipping Location")
 
     @api.constrains("is_default_receiving", "type")
     def _check_default_receiving_is_internal(self):
@@ -25,4 +26,12 @@ class ImLocation(models.Model):
             if location.is_default_receiving and location.type != "internal":
                 raise ValidationError(
                     "Only an internal location can be marked as the default receiving location."
+                )
+
+    @api.constrains("is_default_shipping", "type")
+    def _check_default_shipping_is_internal(self):
+        for location in self:
+            if location.is_default_shipping and location.type != "internal":
+                raise ValidationError(
+                    "Only an internal location can be marked as the default shipping location."
                 )

@@ -45,6 +45,18 @@ class ImMove(models.Model):
     done_date = fields.Datetime(readonly=True)
     user_id = fields.Many2one("res.users", string="Done By", readonly=True)
     purchase_line_id = fields.Many2one("im.purchase.line", string="Purchase Line")
+    shipment_id = fields.Many2one("im.shipment", string="Shipment")
+    adjustment_id = fields.Many2one("im.adjustment", string="Adjustment")
+
+    @api.constrains("purchase_line_id", "shipment_id", "adjustment_id")
+    def _check_single_origin(self):
+        for move in self:
+            origins = [move.purchase_line_id, move.shipment_id, move.adjustment_id]
+            if sum(1 for origin in origins if origin) > 1:
+                raise ValidationError(
+                    "A stock move can trace to at most one originating document "
+                    "(purchase line, shipment, or adjustment)."
+                )
 
     @api.depends("number", "product_id", "quantity")
     def _compute_name(self):

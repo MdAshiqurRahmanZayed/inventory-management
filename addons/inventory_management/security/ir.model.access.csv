@@ -8,3 +8,7 @@ access_im_purchase_order_system,im.purchase.order.system,model_im_purchase_order
 access_im_purchase_line_system,im.purchase.line.system,model_im_purchase_line,base.group_system,1,1,1,1
 access_im_move_system,im.move.system,model_im_move,base.group_system,1,1,1,1
 access_im_quant_system,im.quant.system,model_im_quant,base.group_system,1,0,0,0
+access_im_sale_order_system,im.sale.order.system,model_im_sale_order,base.group_system,1,1,1,1
+access_im_sale_line_system,im.sale.line.system,model_im_sale_line,base.group_system,1,1,1,1
+access_im_shipment_system,im.shipment.system,model_im_shipment,base.group_system,1,1,1,1
+access_im_adjustment_system,im.adjustment.system,model_im_adjustment,base.group_system,1,1,1,1

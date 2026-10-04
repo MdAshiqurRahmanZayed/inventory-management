@@ -11,4 +11,28 @@
         sequence="1"
         web_icon="inventory_management,static/description/icon.png"
         action="action_inventory_management_root"/>
+
+    <menuitem
+        id="menu_im_products_group"
+        name="Products"
+        parent="menu_inventory_management_root"
+        sequence="10"/>
+
+    <menuitem
+        id="menu_im_purchasing_group"
+        name="Purchasing"
+        parent="menu_inventory_management_root"
+        sequence="20"/>
+
+    <menuitem
+        id="menu_im_sales_group"
+        name="Sales"
+        parent="menu_inventory_management_root"
+        sequence="30"/>
+
+    <menuitem
+        id="menu_im_inventory_group"
+        name="Inventory"
+        parent="menu_inventory_management_root"
+        sequence="40"/>
 </odoo>

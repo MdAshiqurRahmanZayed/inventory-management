@@ -19,12 +19,24 @@ class ImWarehouse(models.Model):
         string="Default Receiving Location",
         compute="_compute_default_receiving_location_id",
     )
+    default_shipping_location_id = fields.Many2one(
+        "im.location",
+        string="Default Shipping Location",
+        compute="_compute_default_shipping_location_id",
+    )
 
     @api.depends("location_ids.is_default_receiving")
     def _compute_default_receiving_location_id(self):
         for warehouse in self:
             warehouse.default_receiving_location_id = warehouse.location_ids.filtered(
                 "is_default_receiving"
+            )[:1]
+
+    @api.depends("location_ids.is_default_shipping")
+    def _compute_default_shipping_location_id(self):
+        for warehouse in self:
+            warehouse.default_shipping_location_id = warehouse.location_ids.filtered(
+                "is_default_shipping"
             )[:1]
 
     def _get_default_receiving_location(self):
@@ -40,5 +52,21 @@ class ImWarehouse(models.Model):
             raise ValidationError(
                 f'Warehouse "{self.name}" has more than one location marked as '
                 "the default receiving location. Only one is allowed."
+            )
+        return flagged
+
+    def _get_default_shipping_location(self):
+        self.ensure_one()
+        flagged = self.location_ids.filtered("is_default_shipping")
+        if not flagged:
+            raise ValidationError(
+                f'Warehouse "{self.name}" has no location marked as the default '
+                "shipping location. Flag one internal location before confirming "
+                "a sale order against this warehouse."
+            )
+        if len(flagged) > 1:
+            raise ValidationError(
+                f'Warehouse "{self.name}" has more than one location marked as '
+                "the default shipping location. Only one is allowed."
             )
         return flagged

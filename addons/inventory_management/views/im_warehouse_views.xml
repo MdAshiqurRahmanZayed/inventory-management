@@ -24,6 +24,7 @@
                         <field name="capacity"/>
                         <field name="email"/>
                         <field name="default_receiving_location_id"/>
+                        <field name="default_shipping_location_id"/>
                     </group>
                     <notebook>
                         <page string="Locations">
@@ -33,6 +34,7 @@
                                     <field name="type"/>
                                     <field name="zone_bin"/>
                                     <field name="is_default_receiving"/>
+                                    <field name="is_default_shipping"/>
                                 </list>
                             </field>
                         </page>
@@ -51,7 +53,7 @@
     <menuitem
         id="menu_im_warehouse"
         name="Warehouses"
-        parent="menu_inventory_management_root"
+        parent="menu_im_inventory_group"
         action="action_im_warehouse"
-        sequence="30"/>
+        sequence="10"/>
 </odoo>

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="im_purchase_order_view_list" model="ir.ui.view">
-        <field name="name">im.purchase.order.list</field>
-        <field name="model">im.purchase.order</field>
+    <record id="im_sale_order_view_list" model="ir.ui.view">
+        <field name="name">im.sale.order.list</field>
+        <field name="model">im.sale.order</field>
         <field name="arch" type="xml">
-            <list string="Purchase Orders">
-                <field name="supplier_id"/>
+            <list string="Sale Orders">
+                <field name="customer_id"/>
                 <field name="warehouse_id"/>
                 <field name="order_date"/>
                 <field name="state"/>
@@ -14,14 +14,14 @@
         </field>
     </record>
 
-    <record id="im_purchase_order_view_form" model="ir.ui.view">
-        <field name="name">im.purchase.order.form</field>
-        <field name="model">im.purchase.order</field>
+    <record id="im_sale_order_view_form" model="ir.ui.view">
+        <field name="name">im.sale.order.form</field>
+        <field name="model">im.sale.order</field>
         <field name="arch" type="xml">
-            <form string="Purchase Order">
+            <form string="Sale Order">
                 <header>
                     <button name="action_confirm" string="Confirm" type="object" invisible="state != 'draft'"/>
-                    <button name="action_receive_all" string="Receive All" type="object" invisible="state != 'confirmed'"/>
+                    <button name="action_deliver_all" string="Deliver All" type="object" invisible="state != 'confirmed'"/>
                     <button name="action_done" string="Mark Done" type="object" invisible="state != 'confirmed'"/>
                     <button name="action_cancel" string="Cancel" type="object" invisible="state in ('done', 'cancelled')"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done"/>
@@ -29,13 +29,14 @@
                 <sheet>
                     <group>
                         <group>
-                            <field name="supplier_id"/>
+                            <field name="customer_id"/>
                             <field name="warehouse_id"/>
                         </group>
                         <group>
                             <field name="order_date"/>
                             <field name="expected_date"/>
                             <field name="amount_total"/>
+                            <field name="shipment_id"/>
                         </group>
                     </group>
                     <notebook>
@@ -44,18 +45,8 @@
                                 <list editable="bottom">
                                     <field name="product_id"/>
                                     <field name="quantity"/>
-                                    <field name="unit_cost"/>
+                                    <field name="unit_price"/>
                                     <field name="subtotal"/>
-                                </list>
-                            </field>
-                        </page>
-                        <page string="Moves">
-                            <field name="move_ids" readonly="1">
-                                <list>
-                                    <field name="product_id"/>
-                                    <field name="quantity"/>
-                                    <field name="dest_id"/>
-                                    <field name="state"/>
                                 </list>
                             </field>
                         </page>
@@ -65,16 +56,16 @@
         </field>
     </record>
 
-    <record id="action_im_purchase_order" model="ir.actions.act_window">
-        <field name="name">Purchase Orders</field>
-        <field name="res_model">im.purchase.order</field>
+    <record id="action_im_sale_order" model="ir.actions.act_window">
+        <field name="name">Sale Orders</field>
+        <field name="res_model">im.sale.order</field>
         <field name="view_mode">list,form</field>
     </record>
 
     <menuitem
-        id="menu_im_purchase_order"
-        name="Purchase Orders"
-        parent="menu_im_purchasing_group"
-        action="action_im_purchase_order"
+        id="menu_im_sale_order"
+        name="Sale Orders"
+        parent="menu_im_sales_group"
+        action="action_im_sale_order"
         sequence="10"/>
 </odoo>
