@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_role_management" model="ir.actions.act_window">
+        <field name="name">Users</field>
+        <field name="res_model">res.users</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('res_users_view_list_role_management')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('res_users_view_form_role_management')}),
+        ]"/>
+    </record>
+
+    <menuitem
+        id="menu_role_management_root"
+        name="Role Management"
+        sequence="90"
+        web_icon="role_management,static/description/icon.png"
+        groups="role_management.group_role_manager"/>
+
+    <menuitem
+        id="menu_role_management_roles"
+        name="Roles"
+        parent="menu_role_management_root"
+        action="action_role_management_roles"
+        sequence="10"/>
+
+    <menuitem
+        id="menu_role_management_users"
+        name="Users"
+        parent="menu_role_management_root"
+        action="action_role_management"
+        sequence="20"/>
+</odoo>

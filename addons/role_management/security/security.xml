@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="group_role_manager" model="res.groups">
+        <field name="name">Role Manager</field>
+        <field name="comment">Can open the Role Management app to assign roles to users. Other modules imply this group from their own manager-level group instead of users being added here directly.</field>
+    </record>
+</odoo>
