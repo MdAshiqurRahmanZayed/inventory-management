@@ -1,38 +1,21 @@
 from odoo.exceptions import ValidationError
-from odoo.tests.common import TransactionCase
+
+from .common import BaseTransactionCase
 
 
-class TestSales(TransactionCase):
+class TestSales(BaseTransactionCase):
     def setUp(self):
         super().setUp()
-        self.customer = self.env["res.partner"].create(
-            {"name": "Test Customer", "partner_role": "customer"}
+        self.customer = self._create_partner("Test Customer", "customer")
+        self.warehouse = self._create_warehouse()
+        self.shipping = self._create_location(
+            self.warehouse, name="Shipping", is_default_shipping=True
         )
-        self.warehouse = self.env["im.warehouse"].create({"name": "Test Warehouse"})
-        self.shipping = self.env["im.location"].create(
-            {
-                "name": "Shipping",
-                "warehouse_id": self.warehouse.id,
-                "type": "internal",
-                "is_default_shipping": True,
-            }
-        )
-        self.category = self.env["im.product.category"].create({"name": "Test Category"})
-        self.product_a = self.env["im.product"].create(
-            {"name": "Product A", "sku": "SA-0001", "category_id": self.category.id}
-        )
-        self.product_b = self.env["im.product"].create(
-            {"name": "Product B", "sku": "SB-0001", "category_id": self.category.id}
-        )
-        self._receive(self.product_a, 20)
-        self._receive(self.product_b, 10)
-
-    def _receive(self, product, quantity):
-        move = self.env["im.move"].create(
-            {"product_id": product.id, "quantity": quantity, "dest_id": self.shipping.id}
-        )
-        move.write({"state": "confirmed"})
-        move.write({"state": "done"})
+        self.category = self._create_category()
+        self.product_a = self._create_product(self.category, name="Product A", sku="SA-0001")
+        self.product_b = self._create_product(self.category, name="Product B", sku="SB-0001")
+        self._receive(self.product_a, self.shipping, 20)
+        self._receive(self.product_b, self.shipping, 10)
 
     def _create_order(self, lines):
         return self.env["im.sale.order"].create(

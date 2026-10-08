@@ -120,4 +120,4 @@ class ImMove(models.Model):
             Quant._apply_move(self.product_id, self.source_id, -self.quantity)
         if self.dest_id:
             Quant._apply_move(self.product_id, self.dest_id, self.quantity)
-        self.write({"done_date": fields.Datetime.now(), "user_id": self.env.uid})
+        self.sudo().write({"done_date": fields.Datetime.now(), "user_id": self.env.uid})

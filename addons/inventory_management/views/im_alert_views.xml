@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="im_alert_view_list" model="ir.ui.view">
+        <field name="name">im.alert.list</field>
+        <field name="model">im.alert</field>
+        <field name="arch" type="xml">
+            <list string="Low Stock Alerts">
+                <field name="product_id"/>
+                <field name="level"/>
+                <field name="create_date"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="im_alert_view_form" model="ir.ui.view">
+        <field name="name">im.alert.form</field>
+        <field name="model">im.alert</field>
+        <field name="arch" type="xml">
+            <form string="Low Stock Alert">
+                <header>
+                    <button name="action_close" string="Close" type="object" invisible="state != 'open'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="open,closed"/>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="product_id" readonly="1"/>
+                        <field name="level" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_im_alert" model="ir.actions.act_window">
+        <field name="name">Low Stock Alerts</field>
+        <field name="res_model">im.alert</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem
+        id="menu_im_alert"
+        name="Low Stock Alerts"
+        parent="menu_im_inventory_group"
+        action="action_im_alert"
+        sequence="60"/>
+</odoo>

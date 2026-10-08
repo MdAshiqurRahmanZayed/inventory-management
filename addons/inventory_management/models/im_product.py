@@ -6,6 +6,7 @@ from odoo import models
 class ImProduct(models.Model):
     _name = "im.product"
     _description = "Product"
+    _inherit = ["mail.thread", "mail.activity.mixin"]
     _order = "name"
 
     _sku_unique = models.Constraint(
@@ -27,6 +28,11 @@ class ImProduct(models.Model):
         domain=[("partner_role", "in", ["supplier", "both"])],
     )
     qty_on_hand = fields.Float(compute="_compute_qty_on_hand")
+    responsible_user_id = fields.Many2one(
+        "res.users",
+        string="Responsible User",
+        help="Notified by activity when this product falls below its reorder level.",
+    )
 
     @api.depends()
     def _compute_qty_on_hand(self):

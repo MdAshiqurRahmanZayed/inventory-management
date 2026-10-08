@@ -1,18 +1,15 @@
 from odoo.exceptions import ValidationError
-from odoo.tests.common import TransactionCase
+
+from .common import BaseTransactionCase
 
 
-class TestAdjustments(TransactionCase):
+class TestAdjustments(BaseTransactionCase):
     def setUp(self):
         super().setUp()
-        self.warehouse = self.env["im.warehouse"].create({"name": "Test Warehouse"})
-        self.location = self.env["im.location"].create(
-            {"name": "Storage", "warehouse_id": self.warehouse.id, "type": "internal"}
-        )
-        self.category = self.env["im.product.category"].create({"name": "Test Category"})
-        self.product = self.env["im.product"].create(
-            {"name": "Test Product", "sku": "ADJ-0001", "category_id": self.category.id}
-        )
+        self.warehouse = self._create_warehouse()
+        self.location = self._create_location(self.warehouse, name="Storage")
+        self.category = self._create_category()
+        self.product = self._create_product(self.category, sku="ADJ-0001")
 
     def test_increase_adjustment_raises_stock(self):
         adjustment = self.env["im.adjustment"].create(

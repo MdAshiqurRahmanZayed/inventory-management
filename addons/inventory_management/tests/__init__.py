@@ -1,4 +1,7 @@
+from . import test_access_control
+from . import test_access_matrix
 from . import test_adjustments
+from . import test_alerts
 from . import test_partner_roles
 from . import test_product
 from . import test_purchasing

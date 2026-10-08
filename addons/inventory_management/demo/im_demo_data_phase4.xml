@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!-- One demo user per role, so a fresh demo-data install has someone to test each role as. -->
+    <record id="demo_user_stock_viewer" model="res.users">
+        <field name="name">Dana Viewer</field>
+        <field name="login">dana.viewer@example.com</field>
+        <field name="email">dana.viewer@example.com</field>
+        <field name="group_ids" eval="[(6, 0, [ref('inventory_management.group_stock_viewer')])]"/>
+    </record>
+
+    <record id="demo_user_stock_user" model="res.users">
+        <field name="name">Uma User</field>
+        <field name="login">uma.user@example.com</field>
+        <field name="email">uma.user@example.com</field>
+        <field name="group_ids" eval="[(6, 0, [ref('inventory_management.group_stock_user')])]"/>
+    </record>
+
+    <record id="demo_user_stock_manager" model="res.users">
+        <field name="name">Mo Manager</field>
+        <field name="login">mo.manager@example.com</field>
+        <field name="email">mo.manager@example.com</field>
+        <field name="group_ids" eval="[(6, 0, [ref('inventory_management.group_stock_manager')])]"/>
+    </record>
+
+</odoo>

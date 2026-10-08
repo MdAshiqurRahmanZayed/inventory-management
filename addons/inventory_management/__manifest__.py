@@ -4,23 +4,26 @@
     "category": "Inventory",
     "summary": "Custom inventory management app: products, orders, stock moves and an MCP-safe API.",
     "description": """
-Inventory Management
-=====================
+        Inventory Management
+        =====================
 
-A standalone Odoo inventory app covering products, suppliers/customers,
-warehouses, purchase and sales orders, stock moves, adjustments and
-low-stock alerts, with an OWL dashboard.
+        A standalone Odoo inventory app covering products, suppliers/customers,
+        warehouses, purchase and sales orders, stock moves, adjustments and
+        low-stock alerts, with an OWL dashboard.
 
-Core models, purchasing, sales, stock moves/quants, and adjustments are
-implemented. Role-based access and the MCP connector are still in
-progress — see the project README and OpenSpec change history.
-""",
+        Core models, purchasing, sales, stock moves/quants, adjustments, role-based
+        access, and low-stock alerts are implemented. The MCP connector is still in
+        progress — see the project README and OpenSpec change history.
+    """,
     "author": "Ashiqur Zayed",
     "license": "LGPL-3",
-    "depends": ["base", "mail"],
+    "depends": ["base", "mail", "role_management"],
     "data": [
-        "data/ir_sequence.xml",
+        "security/security.xml",
         "security/ir.model.access.csv",
+        "security/rules.xml",
+        "data/ir_sequence.xml",
+        "data/ir_cron_low_stock.xml",
         "views/inventory_management_menu.xml",
         "views/im_product_category_views.xml",
         "views/im_product_views.xml",
@@ -33,10 +36,12 @@ progress — see the project README and OpenSpec change history.
         "views/im_sale_order_views.xml",
         "views/im_shipment_views.xml",
         "views/im_adjustment_views.xml",
+        "views/im_alert_views.xml",
     ],
     "demo": [
         "demo/im_demo_data.xml",
         "demo/im_demo_data_phase3.xml",
+        "demo/im_demo_data_phase4.xml",
     ],
     "assets": {
         "web.assets_backend": [
