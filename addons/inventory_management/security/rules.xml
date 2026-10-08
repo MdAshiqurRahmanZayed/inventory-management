@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Record rules for CRUD scoping only. Action-level restrictions that are
+        not CRUD operations (e.g. confirming a purchase order) are enforced as
+        explicit `has_group` checks in the model's Python method instead.
+    -->
+
+    <!-- Done moves are read-only for everyone, including Managers: global rule, no groups, ANDs with all other rules. -->
+    <record id="rule_im_move_done_readonly" model="ir.rule">
+        <field name="name">Stock move: Done is read-only for everyone</field>
+        <field name="model_id" ref="model_im_move"/>
+        <field name="domain_force">[('state', '!=', 'done')]</field>
+        <field name="perm_read">0</field>
+        <field name="perm_write">1</field>
+        <field name="perm_create">0</field>
+        <field name="perm_unlink">1</field>
+    </record>
+
+    <!--
+        A Stock User may write only moves they created (any non-Done state,
+        so they can draft, confirm and receive their own moves end to end;
+        the global Done-readonly rule above still locks it once Done).
+    -->
+    <record id="rule_im_move_user_own_write" model="ir.rule">
+        <field name="name">Stock move: User writes only their own moves</field>
+        <field name="model_id" ref="model_im_move"/>
+        <field name="domain_force">[('create_uid', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('group_stock_user'))]"/>
+        <field name="perm_read">0</field>
+        <field name="perm_write">1</field>
+        <field name="perm_create">0</field>
+        <field name="perm_unlink">0</field>
+    </record>
+
+    <!--
+        A Stock Manager is not restricted by move ownership. Managers are
+        implicitly also Stock Users (implied_ids), so this permissive rule
+        must exist for the Manager group for the OR-across-groups combination
+        to lift the ownership restriction above for them.
+    -->
+    <record id="rule_im_move_manager_write" model="ir.rule">
+        <field name="name">Stock move: Manager writes any non-Done move</field>
+        <field name="model_id" ref="model_im_move"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_stock_manager'))]"/>
+        <field name="perm_read">0</field>
+        <field name="perm_write">1</field>
+        <field name="perm_create">0</field>
+        <field name="perm_unlink">0</field>
+    </record>
+</odoo>

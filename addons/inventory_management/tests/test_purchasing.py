@@ -1,29 +1,19 @@
 from odoo.exceptions import ValidationError
-from odoo.tests.common import TransactionCase
+
+from .common import BaseTransactionCase
 
 
-class TestPurchasing(TransactionCase):
+class TestPurchasing(BaseTransactionCase):
     def setUp(self):
         super().setUp()
-        self.supplier = self.env["res.partner"].create(
-            {"name": "Test Supplier", "partner_role": "supplier"}
+        self.supplier = self._create_partner("Test Supplier", "supplier")
+        self.warehouse = self._create_warehouse()
+        self.receiving = self._create_location(
+            self.warehouse, name="Receiving", is_default_receiving=True
         )
-        self.warehouse = self.env["im.warehouse"].create({"name": "Test Warehouse"})
-        self.receiving = self.env["im.location"].create(
-            {
-                "name": "Receiving",
-                "warehouse_id": self.warehouse.id,
-                "type": "internal",
-                "is_default_receiving": True,
-            }
-        )
-        self.category = self.env["im.product.category"].create({"name": "Test Category"})
-        self.product_a = self.env["im.product"].create(
-            {"name": "Product A", "sku": "PA-0001", "category_id": self.category.id}
-        )
-        self.product_b = self.env["im.product"].create(
-            {"name": "Product B", "sku": "PB-0001", "category_id": self.category.id}
-        )
+        self.category = self._create_category()
+        self.product_a = self._create_product(self.category, name="Product A", sku="PA-0001")
+        self.product_b = self._create_product(self.category, name="Product B", sku="PB-0001")
 
     def _create_order(self, lines):
         return self.env["im.purchase.order"].create(

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_groups_view_list_role_management" model="ir.ui.view">
+        <field name="name">res.groups.list.role.management</field>
+        <field name="model">res.groups</field>
+        <field name="arch" type="xml">
+            <list string="Roles">
+                <field name="name"/>
+                <field name="comment"/>
+                <field name="all_users_count" string="Users"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="res_groups_view_form_role_management" model="ir.ui.view">
+        <field name="name">res.groups.form.role.management</field>
+        <field name="model">res.groups</field>
+        <field name="arch" type="xml">
+            <form string="Role">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Role name, e.g. Warehouse Lead"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <field name="comment" placeholder="What is this role for?"/>
+                    </group>
+                    <notebook>
+                        <page string="Groups" name="implied_groups">
+                            <field name="implied_ids" domain="[('id', '!=', id)]"/>
+                        </page>
+                        <page string="Users" name="user_ids">
+                            <field name="user_ids" context="{'search_default_filter_no_share':1}"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_role_management_roles" model="ir.actions.act_window">
+        <field name="name">Roles</field>
+        <field name="res_model">res.groups</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('res_groups_view_list_role_management')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('res_groups_view_form_role_management')}),
+        ]"/>
+        <field name="context">{'create': True}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create a role to group a set of permissions.</p>
+            <p>A role is a group other users can be assigned to. Open a role and pick which permission groups it grants on the Groups tab.</p>
+        </field>
+    </record>
+</odoo>

@@ -32,6 +32,7 @@
                             <field name="reorder_level"/>
                             <field name="qty_on_hand" readonly="1"/>
                             <field name="supplier_id"/>
+                            <field name="responsible_user_id"/>
                         </group>
                     </group>
                     <field name="description" placeholder="Product description..."/>

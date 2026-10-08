@@ -1,4 +1,5 @@
 from . import im_adjustment
+from . import im_alert
 from . import im_dashboard
 from . import im_location
 from . import im_move

@@ -1,6 +1,7 @@
 from odoo import api
 from odoo import fields
 from odoo import models
+from odoo.exceptions import AccessError
 from odoo.exceptions import ValidationError
 
 ALLOWED_TRANSITIONS = {
@@ -93,6 +94,8 @@ class ImPurchaseOrder(models.Model):
         return super().write(vals)
 
     def action_confirm(self):
+        if not self.env.user.has_group("inventory_management.group_stock_manager"):
+            raise AccessError("Only a Stock Manager can confirm a purchase order.")
         for order in self:
             if order.state != "draft":
                 raise ValidationError("Only a Draft purchase order can be confirmed.")
