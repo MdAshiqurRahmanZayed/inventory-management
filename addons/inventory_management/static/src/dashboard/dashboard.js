@@ -14,8 +14,10 @@ export class InventoryManagementDashboard extends Component {
         this.state = useState({ data: null });
         this.categoryCanvasRef = useRef("categoryChart");
         this.roleCanvasRef = useRef("roleChart");
+        this.movesCanvasRef = useRef("movesChart");
         this.categoryChart = null;
         this.roleChart = null;
+        this.movesChart = null;
 
         onWillStart(async () => {
             await loadBundle("web.chartjs_lib");
@@ -29,9 +31,17 @@ export class InventoryManagementDashboard extends Component {
         });
     }
 
+    get formattedStockValue() {
+        return this.state.data.stock_value.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        });
+    }
+
     renderCharts() {
         this.renderPieChart(this.categoryCanvasRef, this.categoryChart, this.state.data.product_by_category);
         this.renderPieChart(this.roleCanvasRef, this.roleChart, this.state.data.partner_by_role);
+        this.renderMovesChart();
     }
 
     renderPieChart(canvasRef, existingChart, breakdown) {
@@ -64,6 +74,39 @@ export class InventoryManagementDashboard extends Component {
         } else {
             this.roleChart = chart;
         }
+    }
+
+    renderMovesChart() {
+        if (!this.movesCanvasRef.el) {
+            return;
+        }
+        if (this.movesChart) {
+            this.movesChart.destroy();
+        }
+        const breakdown = this.state.data.recent_moves;
+        this.movesChart = new Chart(this.movesCanvasRef.el, {
+            type: "bar",
+            data: {
+                labels: ["Receipts", "Deliveries", "Adjustments", "Transfers"],
+                datasets: [
+                    {
+                        data: [
+                            breakdown.receipts,
+                            breakdown.deliveries,
+                            breakdown.adjustments,
+                            breakdown.transfers,
+                        ],
+                        backgroundColor: CHART_COLORS,
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+            },
+        });
     }
 }
 

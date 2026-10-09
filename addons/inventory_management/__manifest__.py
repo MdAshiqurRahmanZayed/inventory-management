@@ -12,8 +12,9 @@
         low-stock alerts, with an OWL dashboard.
 
         Core models, purchasing, sales, stock moves/quants, adjustments, role-based
-        access, and low-stock alerts are implemented. The MCP connector is still in
-        progress — see the project README and OpenSpec change history.
+        access, low-stock alerts, a full dashboard, and a per-warehouse PDF stock
+        report are implemented. The MCP connector is still in progress — see the
+        project README and OpenSpec change history.
     """,
     "author": "Ashiqur Zayed",
     "license": "LGPL-3",
@@ -37,6 +38,7 @@
         "views/im_shipment_views.xml",
         "views/im_adjustment_views.xml",
         "views/im_alert_views.xml",
+        "reports/im_stock_report.xml",
     ],
     "demo": [
         "demo/im_demo_data.xml",

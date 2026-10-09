@@ -16,6 +16,14 @@
         opacity: 0.75;
     }
 
+    .o_im_dashboard_tile_highlight .o_im_dashboard_tile_value {
+        color: #00a09d;
+    }
+
+    .o_im_dashboard_tile_warning .o_im_dashboard_tile_value {
+        color: #dc6e6e;
+    }
+
     .o_im_dashboard_chart {
         width: 320px;
         max-width: 100%;
@@ -26,5 +34,29 @@
         // its container, otherwise the canvas grows unbounded downward.
         height: 240px;
         position: relative;
+    }
+
+    .o_im_dashboard_top_movers {
+        min-height: 240px;
+    }
+
+    .o_im_dashboard_top_movers_list {
+        margin: 0;
+        padding-left: 1.25rem;
+
+        li {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.5rem;
+            padding: 0.25rem 0;
+        }
+    }
+
+    .o_im_dashboard_top_movers_value {
+        font-weight: 600;
+    }
+
+    .o_im_dashboard_placeholder {
+        opacity: 0.6;
     }
 }

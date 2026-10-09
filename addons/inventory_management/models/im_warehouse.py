@@ -55,6 +55,29 @@ class ImWarehouse(models.Model):
             )
         return flagged
 
+    def get_stock_report_lines(self):
+        """Return (lines, total) for this warehouse's stock report.
+
+        One line per product with positive stock, aggregated across all of
+        this warehouse's locations; products with zero stock are excluded.
+        """
+        self.ensure_one()
+        quants = self.env["im.quant"].search(
+            [("location_id", "in", self.location_ids.ids), ("quantity", ">", 0)]
+        )
+        totals_by_product = {}
+        for quant in quants:
+            totals_by_product[quant.product_id] = (
+                totals_by_product.get(quant.product_id, 0.0) + quant.quantity
+            )
+        lines = [
+            {"product": product, "quantity": quantity, "value": quantity * product.cost}
+            for product, quantity in totals_by_product.items()
+        ]
+        lines.sort(key=lambda line: line["product"].name)
+        total = sum(line["value"] for line in lines)
+        return lines, total
+
     def _get_default_shipping_location(self):
         self.ensure_one()
         flagged = self.location_ids.filtered("is_default_shipping")
