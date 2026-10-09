@@ -40,7 +40,6 @@ class ImQuant(models.Model):
                     "quantity": new_quantity,
                 }
             )
-        product.invalidate_recordset(["qty_on_hand"])
 
     @api.model_create_multi
     def create(self, vals_list):

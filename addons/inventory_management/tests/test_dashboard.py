@@ -27,6 +27,22 @@ class TestDashboard(BaseTransactionCase):
         self._receive(product_b, self.location, 3)  # 3 * 4.0 = 12
         self.assertEqual(self._dashboard_data()["stock_value"], 25 + 12)
 
+    def test_stock_value_is_a_stored_field_kept_in_sync(self):
+        # Regression test for the qty_on_hand/stock_value store=True refactor:
+        # both must stay correct through the ORM's dependency tracking alone,
+        # with no manual invalidate/recompute call anywhere in the move flow.
+        product = self._create_product(self.category, sku="DASH-STORED", cost=2.0)
+        self.assertEqual(product.qty_on_hand, 0)
+        self.assertEqual(product.stock_value, 0)
+
+        self._receive(product, self.location, 5)
+        self.assertEqual(product.qty_on_hand, 5)
+        self.assertEqual(product.stock_value, 10)
+
+        # Changing cost alone (no stock movement) must also recompute stock_value.
+        product.cost = 3.0
+        self.assertEqual(product.stock_value, 15)
+
     # -- low stock -------------------------------------------------------
 
     def test_low_stock_count_counts_only_open_alerts(self):
@@ -145,6 +161,32 @@ class TestDashboard(BaseTransactionCase):
         )
         self.assertEqual(self._dashboard_data()["recent_moves"]["total"], 0)
 
+    def test_recent_moves_window_is_configurable(self):
+        product = self._create_product(self.category, sku="MOVE-WINDOW")
+        move_3_days_ago = self._receive(product, self.location, 1)
+        move_3_days_ago.write(
+            {"done_date": fields.Datetime.subtract(fields.Datetime.now(), days=3)}
+        )
+        self._receive(product, self.location, 1)  # today
+
+        # Default (7 days): both count.
+        self.assertEqual(self._dashboard_data()["recent_moves"]["total"], 2)
+
+        # Narrow the window to 1 day: only today's move counts.
+        self.env["ir.config_parameter"].sudo().set_param(
+            "inventory_management.recent_moves_window_days", "1"
+        )
+        self.assertEqual(self._dashboard_data()["recent_moves"]["total"], 1)
+
+    def test_recent_moves_window_ignores_invalid_param(self):
+        self.env["ir.config_parameter"].sudo().set_param(
+            "inventory_management.recent_moves_window_days", "not-a-number"
+        )
+        product = self._create_product(self.category, sku="MOVE-BADPARAM")
+        self._receive(product, self.location, 1)
+        # Falls back to the 7-day default instead of raising.
+        self.assertEqual(self._dashboard_data()["recent_moves"]["total"], 1)
+
     # -- top movers ----------------------------------------------------
 
     def test_top_movers_ranking(self):
@@ -167,4 +209,20 @@ class TestDashboard(BaseTransactionCase):
         self.assertEqual(len(top_movers), 1)
 
     def test_top_movers_empty_when_no_recent_activity(self):
+        self.assertEqual(self._dashboard_data()["top_movers"], [])
+
+    def test_top_movers_window_is_configurable(self):
+        product = self._create_product(self.category, sku="TOP-WINDOW")
+        old_move = self._receive(product, self.location, 10)
+        old_move.write(
+            {"done_date": fields.Datetime.subtract(fields.Datetime.now(), days=10)}
+        )
+
+        # Default (30 days): counted.
+        self.assertEqual(len(self._dashboard_data()["top_movers"]), 1)
+
+        # Narrow the window to 5 days: no longer counted.
+        self.env["ir.config_parameter"].sudo().set_param(
+            "inventory_management.top_movers_window_days", "5"
+        )
         self.assertEqual(self._dashboard_data()["top_movers"], [])

@@ -26,6 +26,13 @@ jobs:
       - name: Prepare Odoo config
         run: cp odoo.conf.example odoo.conf
 
+      - name: Pre-pull base images via mirror (avoids Docker Hub's anonymous rate limit)
+        run: |
+          docker pull mirror.gcr.io/library/postgres:16
+          docker tag mirror.gcr.io/library/postgres:16 postgres:16
+          docker pull mirror.gcr.io/library/odoo:19.0
+          docker tag mirror.gcr.io/library/odoo:19.0 odoo:19.0
+
       - name: Start Postgres
         run: docker compose up -d db
 
