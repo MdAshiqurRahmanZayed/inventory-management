@@ -29,6 +29,18 @@
                         <div class="o_im_dashboard_tile_value" t-esc="state.data.customer_count"/>
                         <div class="o_im_dashboard_tile_label">Customers</div>
                     </div>
+                    <div class="o_im_dashboard_tile o_im_dashboard_tile_highlight p-3">
+                        <div class="o_im_dashboard_tile_value" t-esc="formattedStockValue"/>
+                        <div class="o_im_dashboard_tile_label">Stock Value</div>
+                    </div>
+                    <div class="o_im_dashboard_tile o_im_dashboard_tile_warning p-3">
+                        <div class="o_im_dashboard_tile_value" t-esc="state.data.low_stock_count"/>
+                        <div class="o_im_dashboard_tile_label">Low Stock</div>
+                    </div>
+                    <div class="o_im_dashboard_tile p-3">
+                        <div class="o_im_dashboard_tile_value" t-esc="state.data.open_orders_count"/>
+                        <div class="o_im_dashboard_tile_label">Open Orders</div>
+                    </div>
                 </div>
                 <div class="o_im_dashboard_charts d-flex flex-wrap gap-4">
                     <div class="o_im_dashboard_chart">
@@ -42,6 +54,24 @@
                         <div class="o_im_dashboard_chart_canvas">
                             <canvas t-ref="roleChart"/>
                         </div>
+                    </div>
+                    <div class="o_im_dashboard_chart">
+                        <h4>Moves in the Last 7 Days</h4>
+                        <div class="o_im_dashboard_chart_canvas">
+                            <canvas t-ref="movesChart"/>
+                        </div>
+                    </div>
+                    <div class="o_im_dashboard_chart o_im_dashboard_top_movers">
+                        <h4>Top Movers (30 Days)</h4>
+                        <t t-if="!state.data.top_movers.length">
+                            <p class="o_im_dashboard_placeholder">No moves in the last 30 days.</p>
+                        </t>
+                        <ol t-else="" class="o_im_dashboard_top_movers_list">
+                            <li t-foreach="state.data.top_movers" t-as="mover" t-key="mover.label">
+                                <span class="o_im_dashboard_top_movers_name" t-esc="mover.label"/>
+                                <span class="o_im_dashboard_top_movers_value" t-esc="mover.value"/>
+                            </li>
+                        </ol>
                     </div>
                 </div>
             </t>

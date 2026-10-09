@@ -4,7 +4,7 @@ An Odoo inventory app (`inventory_management`) with its own OWL dashboard, plus 
 
 ## Status: Ongoing / Not Complete
 
-This is an active, in-progress project. It is **not** production-ready. Core data models (products, categories, partner roles, warehouses, locations), purchasing, sales/adjustments, role-based access (Stock Viewer/User/Manager groups and record rules), low-stock alerts, and a data-backed dashboard are implemented; the full dashboard widget set, the PDF stock report, and the MCP connector land in later changes.
+This is an active, in-progress project. It is **not** production-ready. Core data models (products, categories, partner roles, warehouses, locations), purchasing, sales/adjustments, role-based access (Stock Viewer/User/Manager groups and record rules), low-stock alerts, a full OWL dashboard (stock value, low-stock, open orders, 7-day moves, top movers), and a per-warehouse PDF stock report are implemented; the MCP connector lands in a later change.
 
 ## Naming note
 
@@ -385,4 +385,4 @@ docker compose run --rm odoo odoo -d ci_test -i inventory_management --test-enab
 
 ## Roadmap
 
-Products, orders, moves, stock, role-based access, low-stock alerts, and a starter dashboard are implemented. The full dashboard widget set, the PDF stock report, and the MCP connector land in later changes — see `openspec/` for planning artifacts.
+Products, orders, moves, stock, role-based access, low-stock alerts, the full dashboard widget set, and the per-warehouse PDF stock report are implemented. The MCP connector lands in a later change — see `openspec/` for planning artifacts.

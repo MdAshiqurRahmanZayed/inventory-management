@@ -27,14 +27,16 @@ class ImProduct(models.Model):
         string="Supplier",
         domain=[("partner_role", "in", ["supplier", "both"])],
     )
-    qty_on_hand = fields.Float(compute="_compute_qty_on_hand")
+    quant_ids = fields.One2many("im.quant", "product_id", string="Quants")
+    qty_on_hand = fields.Float(compute="_compute_qty_on_hand", store=True)
+    stock_value = fields.Float(compute="_compute_stock_value", store=True)
     responsible_user_id = fields.Many2one(
         "res.users",
         string="Responsible User",
         help="Notified by activity when this product falls below its reorder level.",
     )
 
-    @api.depends()
+    @api.depends("quant_ids.quantity")
     def _compute_qty_on_hand(self):
         quant_groups = self.env["im.quant"]._read_group(
             [("product_id", "in", self.ids)],
@@ -44,3 +46,8 @@ class ImProduct(models.Model):
         totals = {product.id: total for product, total in quant_groups}
         for product in self:
             product.qty_on_hand = totals.get(product.id, 0.0)
+
+    @api.depends("qty_on_hand", "cost")
+    def _compute_stock_value(self):
+        for product in self:
+            product.stock_value = product.qty_on_hand * product.cost

@@ -11,5 +11,6 @@ from . import im_quant
 from . import im_sale_line
 from . import im_sale_order
 from . import im_shipment
+from . import im_stock_report
 from . import im_warehouse
 from . import res_partner
