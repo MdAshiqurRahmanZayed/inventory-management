@@ -2,6 +2,8 @@
 
 An Odoo inventory app (`inventory_management`) with its own OWL dashboard, plus a companion addon (`im_mcp`) that exposes a native **MCP server** — no separate process — so an AI assistant can check stock and draft stock moves through Odoo's own access rules.
 
+> New to the app? See [GUIDE.md](GUIDE.md) for a task-by-task walkthrough (this README is developer-focused).
+
 ## Features
 
 - Products, categories, suppliers and customers (suppliers/customers are Odoo contacts with a role, so one contact can both buy from and sell to you)
