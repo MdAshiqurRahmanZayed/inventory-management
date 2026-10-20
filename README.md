@@ -2,6 +2,8 @@
 
 An Odoo inventory app (`inventory_management`) with its own OWL dashboard, plus a companion addon (`im_mcp`) that exposes a native **MCP server** — no separate process — so an AI assistant can check stock and draft stock moves through Odoo's own access rules.
 
+> New to the app? See [GUIDE.md](GUIDE.md) for a task-by-task walkthrough (this README is developer-focused).
+
 ## Status: Ongoing / Not Complete
 
 This is an active, in-progress project. It is **not** production-ready. Core data models (products, categories, partner roles, warehouses, locations), purchasing, sales/adjustments, role-based access (Stock Viewer/User/Manager groups and record rules), low-stock alerts, a full OWL dashboard (stock value, low-stock, open orders, 7-day moves, top movers), a per-warehouse PDF stock report, and an MCP connector (global per-model access rules, generic record tools, a stock-move tool, and an audit log) are implemented.
