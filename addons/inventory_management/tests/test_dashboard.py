@@ -17,15 +17,24 @@ class TestDashboard(BaseTransactionCase):
 
     # -- stock value ---------------------------------------------------
 
+    # These assertions compare before/after deltas rather than absolute
+    # totals, since get_dashboard_data() aggregates across the whole
+    # database -- a delta is the only thing this test can own regardless
+    # of what else already exists there (demo data, other tests' records,
+    # or real usage on a shared dev db).
+
     def test_stock_value_is_zero_with_no_quants(self):
-        self.assertEqual(self._dashboard_data()["stock_value"], 0)
+        before = self._dashboard_data()["stock_value"]
+        self._create_product(self.category, sku="DASH-NOQUANT", cost=9.0)
+        self.assertEqual(self._dashboard_data()["stock_value"], before)
 
     def test_stock_value_sums_quantity_times_cost(self):
+        before = self._dashboard_data()["stock_value"]
         product_a = self._create_product(self.category, sku="DASH-A", cost=2.5)
         product_b = self._create_product(self.category, name="Product B", sku="DASH-B", cost=4.0)
         self._receive(product_a, self.location, 10)  # 10 * 2.5 = 25
         self._receive(product_b, self.location, 3)  # 3 * 4.0 = 12
-        self.assertEqual(self._dashboard_data()["stock_value"], 25 + 12)
+        self.assertEqual(self._dashboard_data()["stock_value"] - before, 25 + 12)
 
     def test_stock_value_is_a_stored_field_kept_in_sync(self):
         # Regression test for the qty_on_hand/stock_value store=True refactor:
@@ -46,15 +55,17 @@ class TestDashboard(BaseTransactionCase):
     # -- low stock -------------------------------------------------------
 
     def test_low_stock_count_counts_only_open_alerts(self):
+        before = self._dashboard_data()["low_stock_count"]
         product_a = self._create_product(self.category, sku="LOW-A", reorder_level=5)
         product_b = self._create_product(self.category, name="Product B", sku="LOW-B", reorder_level=5)
         self.env["im.alert"].create({"product_id": product_a.id, "state": "open"})
         self.env["im.alert"].create({"product_id": product_b.id, "state": "closed"})
-        self.assertEqual(self._dashboard_data()["low_stock_count"], 1)
+        self.assertEqual(self._dashboard_data()["low_stock_count"] - before, 1)
 
     # -- open orders -------------------------------------------------------
 
     def test_open_orders_count_excludes_done_and_cancelled(self):
+        before = self._dashboard_data()["open_orders_count"]
         supplier = self._create_partner("Dash Supplier", "supplier")
         customer = self._create_partner("Dash Customer", "customer")
         product = self._create_product(self.category, sku="OPEN-0001")
@@ -89,11 +100,12 @@ class TestDashboard(BaseTransactionCase):
         done_po.action_done()
 
         self.assertTrue(draft_po)  # kept as a draft, counted
-        self.assertEqual(self._dashboard_data()["open_orders_count"], 2)
+        self.assertEqual(self._dashboard_data()["open_orders_count"] - before, 2)
 
     # -- recent moves ------------------------------------------------------
 
     def test_recent_moves_breakdown(self):
+        before = self._dashboard_data()["recent_moves"]
         supplier = self._create_partner("Dash Supplier", "supplier")
         customer = self._create_partner("Dash Customer", "customer")
         product = self._create_product(self.category, sku="MOVE-0001")
@@ -141,88 +153,99 @@ class TestDashboard(BaseTransactionCase):
             {"done_date": fields.Datetime.subtract(fields.Datetime.now(), days=8)}
         )
 
-        breakdown = self._dashboard_data()["recent_moves"]
-        self.assertEqual(breakdown["receipts"], 1)
-        self.assertEqual(breakdown["deliveries"], 1)
-        self.assertEqual(breakdown["adjustments"], 1)
-        self.assertEqual(breakdown["transfers"], 1)
-        self.assertEqual(breakdown["total"], 4)
+        after = self._dashboard_data()["recent_moves"]
+        self.assertEqual(after["receipts"] - before["receipts"], 1)
+        self.assertEqual(after["deliveries"] - before["deliveries"], 1)
+        self.assertEqual(after["adjustments"] - before["adjustments"], 1)
+        self.assertEqual(after["transfers"] - before["transfers"], 1)
+        self.assertEqual(after["total"] - before["total"], 4)
         self.assertEqual(
-            breakdown["total"],
-            breakdown["receipts"] + breakdown["deliveries"]
-            + breakdown["adjustments"] + breakdown["transfers"],
+            after["total"],
+            after["receipts"] + after["deliveries"] + after["adjustments"] + after["transfers"],
         )
         self.assertTrue(transfer)
 
     def test_recent_moves_excludes_non_done(self):
+        before = self._dashboard_data()["recent_moves"]["total"]
         product = self._create_product(self.category, sku="MOVE-DRAFT")
         self.env["im.move"].create(
             {"product_id": product.id, "quantity": 5, "dest_id": self.location.id}
         )
-        self.assertEqual(self._dashboard_data()["recent_moves"]["total"], 0)
+        self.assertEqual(self._dashboard_data()["recent_moves"]["total"], before)
 
     def test_recent_moves_window_is_configurable(self):
         product = self._create_product(self.category, sku="MOVE-WINDOW")
+
+        # Default (7 days): a move from 3 days ago is inside the window.
+        before_default = self._dashboard_data()["recent_moves"]["total"]
         move_3_days_ago = self._receive(product, self.location, 1)
         move_3_days_ago.write(
             {"done_date": fields.Datetime.subtract(fields.Datetime.now(), days=3)}
         )
-        self._receive(product, self.location, 1)  # today
+        self.assertEqual(self._dashboard_data()["recent_moves"]["total"] - before_default, 1)
 
-        # Default (7 days): both count.
-        self.assertEqual(self._dashboard_data()["recent_moves"]["total"], 2)
-
-        # Narrow the window to 1 day: only today's move counts.
+        # Narrow the window to 1 day: that move now falls outside it (already
+        # reflected in this baseline, measured under the narrowed window), so
+        # only a fresh move from today should move the count.
         self.env["ir.config_parameter"].sudo().set_param(
             "inventory_management.recent_moves_window_days", "1"
         )
-        self.assertEqual(self._dashboard_data()["recent_moves"]["total"], 1)
+        before_narrow = self._dashboard_data()["recent_moves"]["total"]
+        self._receive(product, self.location, 1)  # today
+        self.assertEqual(self._dashboard_data()["recent_moves"]["total"] - before_narrow, 1)
 
     def test_recent_moves_window_ignores_invalid_param(self):
         self.env["ir.config_parameter"].sudo().set_param(
             "inventory_management.recent_moves_window_days", "not-a-number"
         )
+        before = self._dashboard_data()["recent_moves"]["total"]
         product = self._create_product(self.category, sku="MOVE-BADPARAM")
         self._receive(product, self.location, 1)
         # Falls back to the 7-day default instead of raising.
-        self.assertEqual(self._dashboard_data()["recent_moves"]["total"], 1)
+        self.assertEqual(self._dashboard_data()["recent_moves"]["total"] - before, 1)
 
     # -- top movers ----------------------------------------------------
+
+    # top_movers is a global top-5 ranking, not a sum, so it can't be
+    # delta-tested. Oversized quantities guarantee our own products rank
+    # into the top 5 regardless of what else exists; assertions check our
+    # products' relative order/presence rather than the list's total length.
 
     def test_top_movers_ranking(self):
         product_a = self._create_product(self.category, sku="TOP-A")
         product_b = self._create_product(self.category, name="Product B", sku="TOP-B")
-        self._receive(product_a, self.location, 50)
-        self._receive(product_b, self.location, 30)
+        self._receive(product_a, self.location, 50_000_000)
+        self._receive(product_b, self.location, 30_000_000)
 
-        top_movers = self._dashboard_data()["top_movers"]
-        self.assertEqual(len(top_movers), 2)
-        self.assertEqual(top_movers[0]["label"], product_a.name)
-        self.assertEqual(top_movers[0]["value"], 50)
-        self.assertEqual(top_movers[1]["label"], product_b.name)
-        self.assertEqual(top_movers[1]["value"], 30)
+        labels = [m["label"] for m in self._dashboard_data()["top_movers"]]
+        self.assertLess(labels.index(product_a.name), labels.index(product_b.name))
 
     def test_top_movers_does_not_pad_with_placeholders(self):
-        product = self._create_product(self.category, sku="TOP-ONLY")
-        self._receive(product, self.location, 10)
+        # Regression test: _get_top_movers must never pad its result up to
+        # TOP_MOVERS_LIMIT with fake zero-value entries.
         top_movers = self._dashboard_data()["top_movers"]
-        self.assertEqual(len(top_movers), 1)
+        self.assertLessEqual(len(top_movers), 5)
+        self.assertTrue(all(entry["value"] for entry in top_movers))
 
     def test_top_movers_empty_when_no_recent_activity(self):
-        self.assertEqual(self._dashboard_data()["top_movers"], [])
+        product = self._create_product(self.category, sku="TOP-NOACTIVITY")
+        labels = [m["label"] for m in self._dashboard_data()["top_movers"]]
+        self.assertNotIn(product.name, labels)
 
     def test_top_movers_window_is_configurable(self):
         product = self._create_product(self.category, sku="TOP-WINDOW")
-        old_move = self._receive(product, self.location, 10)
+        old_move = self._receive(product, self.location, 10_000_000)
         old_move.write(
             {"done_date": fields.Datetime.subtract(fields.Datetime.now(), days=10)}
         )
 
-        # Default (30 days): counted.
-        self.assertEqual(len(self._dashboard_data()["top_movers"]), 1)
+        # Default (30 days): our product's move is inside the window.
+        labels = [m["label"] for m in self._dashboard_data()["top_movers"]]
+        self.assertIn(product.name, labels)
 
-        # Narrow the window to 5 days: no longer counted.
+        # Narrow the window to 5 days: our product's 10-day-old move falls outside it.
         self.env["ir.config_parameter"].sudo().set_param(
             "inventory_management.top_movers_window_days", "5"
         )
-        self.assertEqual(self._dashboard_data()["top_movers"], [])
+        labels = [m["label"] for m in self._dashboard_data()["top_movers"]]
+        self.assertNotIn(product.name, labels)

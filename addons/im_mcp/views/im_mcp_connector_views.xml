@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="im_mcp_connector_view_list" model="ir.ui.view">
+        <field name="name">im.mcp.connector.list</field>
+        <field name="model">im.mcp.connector</field>
+        <field name="arch" type="xml">
+            <list string="MCP Connectors">
+                <field name="name"/>
+                <field name="user_id"/>
+                <field name="active"/>
+                <field name="expires_on"/>
+                <field name="last_used"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="im_mcp_connector_view_form" model="ir.ui.view">
+        <field name="name">im.mcp.connector.form</field>
+        <field name="model">im.mcp.connector</field>
+        <field name="arch" type="xml">
+            <form string="MCP Connector">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="user_id"/>
+                        <field name="active"/>
+                        <field name="expires_on"/>
+                        <field name="rate_limit"/>
+                        <field name="last_used"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_im_mcp_connector" model="ir.actions.act_window">
+        <field name="name">MCP Connectors</field>
+        <field name="res_model">im.mcp.connector</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem
+        id="menu_im_mcp_root"
+        name="MCP Connector"
+        action="action_im_mcp_connector"
+        web_icon="im_mcp,static/description/icon.png"
+        groups="group_mcp_admin"
+        sequence="60"/>
+</odoo>
