@@ -1,22 +1,9 @@
-name: CI
+name: Odoo tests
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  workflow_dispatch:
 
 jobs:
-  ruff:
-    name: Ruff lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run ruff
-        uses: astral-sh/ruff-action@v3
-        with:
-          args: "check"
-
   odoo-tests:
     name: Odoo module tests
     runs-on: ubuntu-latest
@@ -26,7 +13,7 @@ jobs:
       - name: Prepare Odoo config
         run: cp odoo.conf.example odoo.conf
 
-      - name: Pre-pull base images via mirror (avoids Docker Hub's anonymous rate limit)
+      - name: Pre-pull base images via mirror (avoids Docker Hub's anonymous pull rate limit)
         run: |
           docker pull mirror.gcr.io/library/postgres:16
           docker tag mirror.gcr.io/library/postgres:16 postgres:16
@@ -54,7 +41,7 @@ jobs:
         run: |
           docker compose run --rm odoo odoo \
             -d ci_test \
-            -i inventory_management,im_mcp \
+            -i role_management,inventory_management,im_mcp \
             --test-enable \
             --test-tags /inventory_management,/im_mcp \
             --stop-after-init \

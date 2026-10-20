@@ -1,0 +1,18 @@
+name: Ruff lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ruff:
+    name: Ruff lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run ruff
+        uses: astral-sh/ruff-action@v3
+        with:
+          args: "check"

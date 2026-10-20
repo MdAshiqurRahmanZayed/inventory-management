@@ -384,12 +384,12 @@ Use `docker compose run --rm`, not `exec` — `run` spins up a one-off container
 
 ```bash
 # Full test suite for both addons, against a disposable test db:
-docker compose run --rm odoo odoo -d ci_test -i inventory_management,im_mcp \
+docker compose run --rm odoo odoo -d ci_test -i role_management,inventory_management,im_mcp \
   --test-enable --test-tags /inventory_management,/im_mcp \
   --stop-after-init --http-port=8169
 
 # Just im_mcp:
-docker compose run --rm odoo odoo -d ci_test -i inventory_management,im_mcp \
+docker compose run --rm odoo odoo -d ci_test -i role_management,inventory_management,im_mcp \
   --test-enable --test-tags /im_mcp \
   --stop-after-init --http-port=8169
 
