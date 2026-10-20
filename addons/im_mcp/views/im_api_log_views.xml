@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="im_api_log_view_list" model="ir.ui.view">
+        <field name="name">im.api.log.list</field>
+        <field name="model">im.api.log</field>
+        <field name="arch" type="xml">
+            <list string="MCP Call Log" create="false" edit="false" delete="false"
+                  decoration-danger="allowed == False"
+                  decoration-success="allowed == True">
+                <field name="create_date" string="Timestamp"/>
+                <field name="connector_id"/>
+                <field name="user_id"/>
+                <field name="tool"/>
+                <field name="model"/>
+                <field name="operation" optional="show"/>
+                <field name="allowed" widget="boolean"/>
+                <field name="duration" string="Seconds" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="im_api_log_view_form" model="ir.ui.view">
+        <field name="name">im.api.log.form</field>
+        <field name="model">im.api.log</field>
+        <field name="arch" type="xml">
+            <form string="MCP Call Log" create="false" edit="false" delete="false">
+                <sheet>
+                    <group>
+                        <field name="create_date" string="When"/>
+                        <field name="connector_id"/>
+                        <field name="user_id"/>
+                        <field name="tool"/>
+                        <field name="model"/>
+                        <field name="operation"/>
+                        <field name="allowed"/>
+                        <field name="duration"/>
+                    </group>
+                    <group>
+                        <field name="inputs"/>
+                        <field name="result"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="im_api_log_view_search" model="ir.ui.view">
+        <field name="name">im.api.log.search</field>
+        <field name="model">im.api.log</field>
+        <field name="arch" type="xml">
+            <search string="MCP Call Log">
+                <field name="connector_id"/>
+                <field name="user_id"/>
+                <field name="tool"/>
+                <field name="model"/>
+                <filter name="allowed" string="Allowed" domain="[('allowed', '=', True)]"/>
+                <filter name="refused" string="Refused" domain="[('allowed', '=', False)]"/>
+                <separator/>
+                <filter name="today" string="Today"
+                    domain="[('create_date', '&gt;=', (context_today()).strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <filter name="group_connector" string="Connector" context="{'group_by': 'connector_id'}"/>
+                <filter name="group_tool" string="Tool" context="{'group_by': 'tool'}"/>
+                <filter name="group_model" string="Model" context="{'group_by': 'model'}"/>
+                <filter name="group_user" string="User" context="{'group_by': 'user_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_im_api_log" model="ir.actions.act_window">
+        <field name="name">Call Log</field>
+        <field name="res_model">im.api.log</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_today': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No MCP activity recorded yet.</p>
+            <p>Every call made through the /mcp/ endpoint appears here, allowed or refused, with the connector, user, tool, target model, and duration.</p>
+        </field>
+    </record>
+
+    <menuitem
+        id="menu_im_mcp_connectors"
+        name="Connectors"
+        parent="menu_im_mcp_root"
+        action="action_im_mcp_connector"
+        sequence="10"/>
+
+    <menuitem
+        id="menu_im_api_log"
+        name="Call Log"
+        parent="menu_im_mcp_root"
+        action="action_im_api_log"
+        sequence="20"/>
+</odoo>

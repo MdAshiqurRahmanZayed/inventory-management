@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="im_mcp_access_view_list" model="ir.ui.view">
+        <field name="name">im.mcp.access.list</field>
+        <field name="model">im.mcp.access</field>
+        <field name="arch" type="xml">
+            <list string="MCP Access Rules" editable="bottom">
+                <field name="model_id"/>
+                <field name="enabled"/>
+                <field name="can_read"/>
+                <field name="can_write"/>
+                <field name="can_create"/>
+                <field name="can_delete"/>
+                <field name="field_ids" widget="many2many_tags" optional="show"/>
+                <field name="domain" optional="show"/>
+                <field name="max_records"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="im_mcp_access_view_form" model="ir.ui.view">
+        <field name="name">im.mcp.access.form</field>
+        <field name="model">im.mcp.access</field>
+        <field name="arch" type="xml">
+            <form string="MCP Access Rule">
+                <sheet>
+                    <group>
+                        <field name="model_id"/>
+                        <field name="enabled"/>
+                        <field name="can_read"/>
+                        <field name="can_write"/>
+                        <field name="can_create"/>
+                        <field name="can_delete"/>
+                        <field name="field_ids" widget="many2many_tags"/>
+                        <field name="domain"/>
+                        <field name="max_records"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_im_mcp_access" model="ir.actions.act_window">
+        <field name="name">Access Rules</field>
+        <field name="res_model">im.mcp.access</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No model is exposed through MCP yet.</p>
+            <p>Enable a model here, with the operations MCP may use on it. This applies to every connector — a connector's own user still needs their native Odoo role to actually see or change the data.</p>
+        </field>
+    </record>
+
+    <menuitem
+        id="menu_im_mcp_access"
+        name="Access Rules"
+        parent="menu_im_mcp_root"
+        action="action_im_mcp_access"
+        sequence="30"/>
+</odoo>
