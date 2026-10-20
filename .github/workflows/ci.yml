@@ -50,13 +50,13 @@ jobs:
           docker compose logs db
           exit 1
 
-      - name: Run inventory_management tests
+      - name: Run inventory_management and im_mcp tests
         run: |
           docker compose run --rm odoo odoo \
             -d ci_test \
-            -i inventory_management \
+            -i inventory_management,im_mcp \
             --test-enable \
-            --test-tags /inventory_management \
+            --test-tags /inventory_management,/im_mcp \
             --stop-after-init \
             --http-port=8169
 

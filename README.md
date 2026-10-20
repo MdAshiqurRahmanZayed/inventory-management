@@ -1,10 +1,10 @@
 # Inventory Management
 
-An Odoo inventory app (`inventory_management`) with its own OWL dashboard, plus a planned **MCP server** (`odoo-mcp`) that lets an AI assistant check stock and create stock moves through Odoo's own access rules.
+An Odoo inventory app (`inventory_management`) with its own OWL dashboard, plus a companion addon (`im_mcp`) that exposes a native **MCP server** — no separate process — so an AI assistant can check stock and draft stock moves through Odoo's own access rules.
 
 ## Status: Ongoing / Not Complete
 
-This is an active, in-progress project. It is **not** production-ready. Core data models (products, categories, partner roles, warehouses, locations), purchasing, sales/adjustments, role-based access (Stock Viewer/User/Manager groups and record rules), low-stock alerts, a full OWL dashboard (stock value, low-stock, open orders, 7-day moves, top movers), and a per-warehouse PDF stock report are implemented; the MCP connector lands in a later change.
+This is an active, in-progress project. It is **not** production-ready. Core data models (products, categories, partner roles, warehouses, locations), purchasing, sales/adjustments, role-based access (Stock Viewer/User/Manager groups and record rules), low-stock alerts, a full OWL dashboard (stock value, low-stock, open orders, 7-day moves, top movers), a per-warehouse PDF stock report, and an MCP connector (global per-model access rules, generic record tools, a stock-move tool, and an audit log) are implemented.
 
 ## Naming note
 
@@ -33,10 +33,10 @@ Safe to re-run — it skips any module already present in `extra-addons/`.
 
 ### Goal
 
-Build **Inventory Management**, a simple inventory app for Odoo with its own OWL dashboard, plus an **MCP server** that lets an AI assistant check stock and create stock moves through Odoo's own access rules. Plan for about 10 weeks of evenings and weekends. The data model follows the standard inventory ER designs from GeeksforGeeks and Kladana (see Sources).
+Build **Inventory Management**, a simple inventory app for Odoo with its own OWL dashboard, plus a built-in **MCP server** that lets an AI assistant check stock and draft stock moves through Odoo's own access rules. Plan for about 10 weeks of evenings and weekends. The data model follows the standard inventory ER designs from GeeksforGeeks and Kladana (see Sources).
 
 - **Odoo module** (`inventory_management`): shows models, security, views, wizards, cron and **OWL frontend** work, which your resume does not show yet.
-- **MCP connector** (`odoo-mcp`): shows API design, authentication and safe AI tool access, built from scratch and fully separate from Strativ code.
+- **MCP connector**: shows API design, authentication and safe AI tool access, implemented as a native Odoo HTTP endpoint inside the same module — no separate server to deploy.
 - Together they tell one story: a working business app that other systems and AI assistants can use safely.
 
 ### Scope
@@ -242,47 +242,85 @@ Three groups, each including the one below it, so a Manager automatically has ev
 
 ### MCP connector
 
-`odoo-mcp` is a Python MCP server built on the official MCP SDK. What it can touch is set inside Odoo, per connector: a Manager chooses which models each connector may use and which operations are allowed, the same way Odoo's own access rights screen works.
+The MCP server is not a separate process — it ships as its own Odoo app, `im_mcp` (depends on `inventory_management`, installed alongside it), exposing `POST /mcp/` (JSON-RPC 2.0, MCP streamable-HTTP transport) inside the same Odoo instance. Keeping it a separate module means the core inventory app stays free of MCP-specific models and tests, and the connector can be installed, upgraded, or removed independently. What MCP as a whole can touch is set once, globally, the same way Odoo's own access rights screen works — per-user scoping then comes entirely from each connector's bound user's existing Stock Viewer/User/Manager role.
 
-**Connector setup in Odoo** (menu *Inventory Management > Configuration > MCP Connectors*, Manager only)
+**Setup in Odoo** (its own **MCP Connector** app, Manager only)
 
 | Model | Key fields | Purpose |
 | --- | --- | --- |
-| `im.mcp.connector` | name, user_id, api_key (stored hashed), active, expires_on, rate_limit, last_used | One connection, for example "Claude Desktop, warehouse lead"; it always runs as its user |
-| `im.mcp.access` | connector_id, model_id, can_read, can_write, can_create, can_delete, field_ids, domain, max_records | Which models the connector may use, which operations, which fields and which records |
-| `im.api.log` | connector_id, user_id, tool, model, operation, inputs, result, allowed, duration, date | Every call, allowed or refused |
+| `im.mcp.connector` | name, user_id, active, expires_on, rate_limit, last_used | One connection, for example "Claude Desktop, warehouse lead"; it always runs as its user. Authenticated by that user's own Odoo API key — no separate secret store |
+| `im.mcp.access` | model_id, enabled, can_read, can_write, can_create, can_delete, field_ids, domain, max_records | One row per model (global — shared by every connector): whether MCP may use it at all, which operations, which fields, which records |
+| `im.api.log` | connector_id, user_id, tool, model, operation, inputs, result, allowed, duration | Every call, allowed or refused |
 
 **How each call is checked**
 
-1. The MCP server sends its API key; Odoo finds the active, unexpired connector and its user, or refuses the call.
-2. The connector's access line for that model must allow the operation, for example `can_write`.
-3. Odoo's own access rights and record rules for that user must also allow it, so a connector can never do more than its user.
-4. Only the listed fields are read or written, the line's domain is added to every search, and results stop at `max_records`.
-5. The call and its result are saved to `im.api.log`.
+1. The caller presents an Odoo API key (`Authorization: Bearer <key>` or `X-API-Key`); Odoo resolves it to a user via `res.users.apikeys`, and the user must hold the **MCP User** group, or the call is refused.
+2. Odoo finds that user's active, unexpired `im.mcp.connector`, or refuses the call.
+3. The model's global `im.mcp.access` row must be enabled and allow the operation, for example `can_write`.
+4. Odoo's own access rights and record rules for the connector's bound user must also allow it, so a connector can never do more than its user — the server never uses `sudo()` on the ORM call itself. Two connectors bound to users with different Odoo roles see different results from the same global rule.
+5. Only the listed fields are read, the row's domain is added to every search, and results stop at `max_records`.
+6. The call and its result are logged to `im.api.log`, allowed or refused.
 
-**Tools**
-
-Generic tools work on any model the connector allows:
+**Tools** (JSON-RPC 2.0 envelope — the spec's reserved error codes `-32700`/`-32600`/`-32601`/`-32602`/`-32603`, plus our own `-32001` for an access/validation refusal; all built in `services/jsonrpc.py` so every response, success or error, is shaped the same way)
 
 | Tool | What it does |
 | --- | --- |
-| `list_models` | The models this connector may use, with their allowed operations and fields |
-| `search_records` | Search a model with a domain, fields, limit and order |
-| `get_record` | Read one record by ID |
-| `create_record` | Create a record; a new `im.move` always starts as Draft |
-| `update_record` | Change fields on a record |
+| `list_models` | Every model currently enabled for MCP, with its allowed operations — call this first, don't guess model names |
+| `search_records` | Search a model: `domain`, `fields`, `limit`, `offset` |
+| `get_record` | Read one record by ID, optionally restricted to `fields` |
+| `create_record` | Create a record from `values` |
+| `update_record` | Change `values` on a record |
 | `delete_record` | Delete a record, only where `can_delete` is ticked |
+| `draft_stock_move` | Validates product/source/destination, then creates an `im.move` in Draft |
 
-Inventory shortcuts sit on top so the AI needs fewer steps: `get_stock`, `list_low_stock`, `list_open_orders`, `create_move_draft` and `stock_summary`. They go through the same checks for every model they read or write.
+Model names are this app's own (`im.product`, `im.warehouse`, `im.move`, …), **not** Odoo's standard `product.product`/`stock.*` models — those aren't part of this addon and will always be refused. `tools/list` now returns a real JSON Schema per tool (types, required fields) so a well-behaved client sends correct types; `limit`/`offset`/`record_id`/numeric args and `values`/`fields` are still coerced defensively (int-as-string, dict-as-JSON-string) in case a client sends them loosely anyway.
 
 **Safety rules**
 
-- Permission is the overlap of the connector's access lines and the user's own rights; the server never uses `sudo()`.
-- Deny by default: a new connector can touch nothing until a Manager adds access lines.
-- Sensitive models (`res.users`, `ir.*`, `im.mcp.*`) can never be added to an access line.
-- API keys are shown once, stored hashed, can expire and can be revoked at any time.
-- Each connector has a rate limit, and every result has a row cap.
-- Settings come from environment variables (Odoo URL, database, API key); no secrets in the repo.
+- Permission is the overlap of the model's global access rule and the connector's bound user's own Odoo rights.
+- Deny by default: a model is unreachable through MCP until a Manager enables it. The refusal message names the exact model/operation and where to go fix it (MCP Connector app > Access Rules).
+- Sensitive models (`res.users`, `im.api.log`, `ir.*`, `im.mcp.*`) can never be enabled for MCP.
+- `field_ids` on an access rule is restricted to fields of that rule's own `model_id` — both in the UI (domain) and server-side (a constraint), since Odoo's Many2many domain alone is UI-only and wouldn't stop a field from a different model arriving via direct write/import.
+- API keys are Odoo's own (Settings > Users > API Keys) — shown once, stored hashed, can expire and be revoked at any time.
+- Each connector has a rate-limit field (not yet enforced) and every model's access rule has a result-row cap.
+
+**Connecting an AI assistant**
+
+1. In Odoo, add the user to the **MCP User** group (Settings > Users), then generate an API key for them (Settings > Users > that user > Account Security > API Keys > New). Copy it immediately — it's shown once.
+2. As a Manager, open the **MCP Connector** app: create a connector for that user (Connectors), and under Access Rules, enable whichever models MCP as a whole should be able to reach (this applies globally, not just to this one connector).
+3. Verify the server is reachable: `curl http://localhost:8069/mcp/health`.
+4. **Claude Code** — add to the project's `.mcp.json` (keep it out of version control):
+   ```json
+   {
+     "mcpServers": {
+       "inventory": {
+         "type": "http",
+         "url": "http://localhost:8069/mcp/",
+         "headers": { "Authorization": "Bearer <your-api-key>" }
+       }
+     }
+   }
+   ```
+5. **Claude Desktop** doesn't speak HTTP transport directly — bridge with [`mcp-remote`](https://www.npmjs.com/package/mcp-remote) (needs Node.js) in `claude_desktop_config.json`:
+   ```json
+   {
+     "mcpServers": {
+       "inventory": {
+         "command": "npx",
+         "args": ["mcp-remote", "http://localhost:8069/mcp/", "--header", "Authorization:Bearer <your-api-key>"]
+       }
+     }
+   }
+   ```
+   Restart Claude Desktop after saving.
+
+This is a local/demo setup (static API key, no OAuth, no public hosting) — intentionally out of scope for Anthropic's connector directory, which requires OAuth 2.0 and an always-on public endpoint.
+
+**Troubleshooting**
+
+- **`mcp-remote` tries an OAuth browser flow instead of using your API key** — it caches OAuth client registrations per server URL in `~/.mcp-auth/mcp-remote-v1/`. If you (or another project) ever pointed `mcp-remote` at the same URL (e.g. another local Odoo also on `localhost:8069`) and it triggered OAuth once, that stale registration gets reused. Fix: quit the client, delete the matching `~/.mcp-auth/mcp-remote-v1/<hash>_*` files for that URL, reconnect.
+- **"MCP is not allowed to '...' on '...'"** — expected, not a bug: that model has no `im.mcp.access` row, or the row doesn't grant that operation. The message says exactly where to enable it. Check you're using this app's own model names (`im.product`, not `product.product`).
+- **A tool call 500s with a generic "Internal error"** — logged server-side with the real traceback (`_logger.exception` in `services/protocol.py`); the client never sees internals, by design. Check the Odoo log.
 
 ### Milestones
 
@@ -333,7 +371,8 @@ Requires Docker and Docker Compose.
 4. Open Odoo in your browser at [http://localhost:8069](http://localhost:8069) and create/select a database. If port 8069 is already used by another project, edit the host-side port directly in `docker-compose.yml`'s `ports:` section (e.g. `"8169:8069"`).
 5. Go to **Apps**, click **Update Apps List**, remove the "Apps" filter, search for **"Inventory Management"**, and click **Install**.
 6. Confirm the module installs with no errors — `--with-demo` loads sample products, categories, warehouses, locations, and contacts, and the dashboard shows real counts on first load.
-7. Optional: search for **"Web Responsive"** and install it too, for the icon-grid app launcher (click the waffle icon top-left after installing).
+7. To enable the MCP connector, search for **"Inventory Management MCP Connector"** (`im_mcp`) and install it too — it shows as its own app (depends on `inventory_management`, adds nothing to the core app's models).
+8. Optional: search for **"Web Responsive"** and install it too, for the icon-grid app launcher (click the waffle icon top-left after installing).
 
 To stop the environment: `docker compose down` (add `-v` to also drop the database volume).
 
@@ -344,14 +383,19 @@ To stop the environment: `docker compose down` (add `-v` to also drop the databa
 Use `docker compose run --rm`, not `exec` — `run` spins up a one-off container without publishing port 8069, so it won't conflict with `docker compose up`'s already-running server (an `exec` into the running container tries to bind the same port a second time and fails with "Address already in use").
 
 ```bash
-# Full module test suite, against a disposable test db:
-docker compose run --rm odoo odoo -d ci_test -i inventory_management \
-  --test-enable --test-tags /inventory_management \
+# Full test suite for both addons, against a disposable test db:
+docker compose run --rm odoo odoo -d ci_test -i inventory_management,im_mcp \
+  --test-enable --test-tags /inventory_management,/im_mcp \
+  --stop-after-init --http-port=8169
+
+# Just im_mcp:
+docker compose run --rm odoo odoo -d ci_test -i inventory_management,im_mcp \
+  --test-enable --test-tags /im_mcp \
   --stop-after-init --http-port=8169
 
 # Re-run against an existing db without reinstalling:
 docker compose run --rm odoo odoo -d ci_test \
-  --test-tags /inventory_management --stop-after-init --http-port=8169
+  --test-tags /inventory_management,/im_mcp --stop-after-init --http-port=8169
 
 # One test class/method only:
 docker compose run --rm odoo odoo -d ci_test \
@@ -363,19 +407,20 @@ docker compose run --rm odoo odoo -d ci_test \
 
 ## Repository layout
 
-- `addons/inventory_management/` — this project's own Odoo module source. Committed.
+- `addons/inventory_management/` — this project's core Odoo module source (products, orders, stock, dashboard). Committed.
+- `addons/im_mcp/` — the MCP connector, a separate installable addon depending on `inventory_management`. Committed.
 - `extra-addons/` — third-party (OCA) modules, e.g. `web_responsive`. Gitignored; fetched via `scripts/fetch-extra-addons.sh`.
 - `scripts/fetch-extra-addons.sh` — (re-)fetches everything under `extra-addons/`.
 - `docker-compose.yml`, `odoo.conf.example` — local dev environment (copy `odoo.conf.example` to `odoo.conf`, gitignored; it's the single place DB credentials, admin password, and addons path are configured). Mounts both `addons/` and `extra-addons/` into the container at `/mnt/addons` and `/mnt/extra-addons` respectively.
 - `openspec/` — [OpenSpec](https://openspec.dev) planning artifacts (proposals, specs, design, tasks) driving this project's development.
-- `ruff.toml` — lint config for this module's Python code (excludes vendored `extra-addons/`).
-- `.github/workflows/ci.yml` — CI: ruff lint + `inventory_management`'s tests run against Postgres via Docker Compose, on every push/PR to `main`.
+- `ruff.toml` — lint config for this repo's Python code (excludes vendored `extra-addons/`).
+- `.github/workflows/ci.yml` — CI: ruff lint + both addons' tests run against Postgres via Docker Compose, on every push/PR to `main`.
 
 ## CI
 
 On every push/PR to `main`:
-- **Ruff lint** — `ruff check` against `addons/inventory_management` (vendored `extra-addons/` excluded).
-- **Odoo tests** — starts Postgres (waits for its healthcheck), then runs `inventory_management`'s test suite headlessly via `docker compose run`, isolated with `--test-tags /inventory_management`.
+- **Ruff lint** — `ruff check` against the repo (vendored `extra-addons/` excluded).
+- **Odoo tests** — starts Postgres (waits for its healthcheck), then installs and runs both `inventory_management`'s and `im_mcp`'s test suites headlessly via `docker compose run`, isolated with `--test-tags /inventory_management,/im_mcp`.
 
 Run the same checks locally:
 ```bash
@@ -385,4 +430,4 @@ docker compose run --rm odoo odoo -d ci_test -i inventory_management --test-enab
 
 ## Roadmap
 
-Products, orders, moves, stock, role-based access, low-stock alerts, the full dashboard widget set, and the per-warehouse PDF stock report are implemented. The MCP connector lands in a later change — see `openspec/` for planning artifacts.
+Products, orders, moves, stock, role-based access, low-stock alerts, the full dashboard widget set, the per-warehouse PDF stock report, and the MCP connector are implemented — see `openspec/` for planning artifacts. Possible v2 items: lots/serial numbers, barcodes, multi-company, OAuth-based MCP auth for a public connector listing, rate-limit enforcement.

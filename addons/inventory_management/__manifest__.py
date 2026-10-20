@@ -13,8 +13,8 @@
 
         Core models, purchasing, sales, stock moves/quants, adjustments, role-based
         access, low-stock alerts, a full dashboard, and a per-warehouse PDF stock
-        report are implemented. The MCP connector is still in progress — see the
-        project README and OpenSpec change history.
+        report are implemented. The MCP connector ships as a separate addon,
+        `im_mcp`, which depends on this module.
     """,
     "author": "Ashiqur Zayed",
     "license": "LGPL-3",
