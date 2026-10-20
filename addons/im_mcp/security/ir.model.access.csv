@@ -1,5 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_im_mcp_connector_manager,im.mcp.connector.manager,model_im_mcp_connector,inventory_management.group_stock_manager,1,1,1,1
-access_im_mcp_access_manager,im.mcp.access.manager,model_im_mcp_access,inventory_management.group_stock_manager,1,1,1,1
-access_im_api_log_user,im.api.log.user,model_im_api_log,inventory_management.group_stock_user,1,0,0,0
-access_im_api_log_manager,im.api.log.manager,model_im_api_log,inventory_management.group_stock_manager,1,1,0,0
+access_im_mcp_connector_admin,im.mcp.connector.admin,model_im_mcp_connector,group_mcp_admin,1,1,1,1
+access_im_mcp_access_admin,im.mcp.access.admin,model_im_mcp_access,group_mcp_admin,1,1,1,1
+access_im_api_log_user,im.api.log.user,model_im_api_log,group_mcp_user,1,0,0,0
+access_im_api_log_admin,im.api.log.admin,model_im_api_log,group_mcp_admin,1,1,0,0

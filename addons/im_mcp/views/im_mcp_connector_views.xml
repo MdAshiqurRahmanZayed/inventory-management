@@ -44,6 +44,6 @@
         name="MCP Connector"
         action="action_im_mcp_connector"
         web_icon="im_mcp,static/description/icon.png"
-        groups="inventory_management.group_stock_manager"
+        groups="group_mcp_admin"
         sequence="60"/>
 </odoo>

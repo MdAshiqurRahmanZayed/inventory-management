@@ -55,5 +55,6 @@
         name="Access Rules"
         parent="menu_im_mcp_root"
         action="action_im_mcp_access"
+        groups="group_mcp_admin"
         sequence="30"/>
 </odoo>

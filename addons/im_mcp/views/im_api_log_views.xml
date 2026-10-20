@@ -83,6 +83,7 @@
         name="Connectors"
         parent="menu_im_mcp_root"
         action="action_im_mcp_connector"
+        groups="group_mcp_admin"
         sequence="10"/>
 
     <menuitem
@@ -90,5 +91,6 @@
         name="Call Log"
         parent="menu_im_mcp_root"
         action="action_im_api_log"
+        groups="group_mcp_user,group_mcp_admin"
         sequence="20"/>
 </odoo>
