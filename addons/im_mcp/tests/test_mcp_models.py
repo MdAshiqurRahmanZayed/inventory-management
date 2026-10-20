@@ -27,6 +27,12 @@ class TestMcpAccessRule(BaseTransactionCase):
     def setUp(self):
         super().setUp()
         self.product_model = self.env["ir.model"].search([("model", "=", "im.product")], limit=1)
+        # Access rules are global; clear any pre-existing ones so this class's
+        # assumptions hold regardless of what the target db already has configured
+        # (e.g. a manually set up dev db). The transaction rolls back after each test.
+        self.env["im.mcp.access"].search(
+            [("model_name", "in", ["im.product", "im.warehouse"])]
+        ).unlink()
 
     def test_blocked_models_rejected(self):
         for model_name in ("res.users", "ir.model", "im.mcp.connector", "im.api.log"):

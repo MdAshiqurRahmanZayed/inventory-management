@@ -24,8 +24,20 @@ class McpToolsBase(BaseTransactionCase):
         return self.env(user=user)
 
     def _grant(self, model, **ops):
+        """Create a fresh access rule for *model*, replacing any that already exists.
+
+        Access rules are global (unique per model), so running this suite against
+        a database that already has real rules (e.g. a manually configured dev db)
+        must not collide with them. The transaction rolls back after each test, so
+        this never touches the real row beyond the test.
+        """
         model_id = self.env["ir.model"].search([("model", "=", model)], limit=1).id
+        self.env["im.mcp.access"].search([("model_id", "=", model_id)]).unlink()
         return self.env["im.mcp.access"].create({"model_id": model_id, **ops})
+
+    def _revoke(self, model):
+        """Ensure no access rule exists for *model*, regardless of what the db already has."""
+        self.env["im.mcp.access"].search([("model_name", "=", model)]).unlink()
 
 
 class TestSearchAndGet(McpToolsBase):
@@ -39,6 +51,7 @@ class TestSearchAndGet(McpToolsBase):
         self.assertTrue(any(r["id"] == self.product.id for r in result["records"]))
 
     def test_search_model_without_access_row(self):
+        self._revoke("im.warehouse")
         with self.assertRaises(AccessError):
             tools.search_records(self.c_env, "im.warehouse")
 
@@ -124,21 +137,27 @@ class TestCreateUpdateDelete(McpToolsBase):
 
 
 class TestListModels(McpToolsBase):
+    # list_models is deliberately global -- it reflects every enabled model,
+    # not just what a given test granted -- so assertions check containment,
+    # not an exact list, since other rules may already exist in the target db.
+
     def test_list_models_reflects_global_rules(self):
         self._grant("im.product", can_read=True)
         self._grant("im.warehouse", can_read=True, can_write=True)
 
-        result = tools.list_models(self._user_env("user"))
+        models_by_name = {m["model"]: m for m in tools.list_models(self._user_env("user"))["models"]}
 
-        self.assertEqual(sorted(m["model"] for m in result["models"]), ["im.product", "im.warehouse"])
+        self.assertEqual(models_by_name["im.product"]["operations"]["read"], True)
+        self.assertEqual(models_by_name["im.warehouse"]["operations"]["write"], True)
 
     def test_list_models_excludes_disabled(self):
         self._grant("im.product", can_read=True)
         access = self._grant("im.warehouse", can_read=True, enabled=False)
 
-        result = tools.list_models(self._user_env("user"))
+        models = [m["model"] for m in tools.list_models(self._user_env("user"))["models"]]
 
-        self.assertEqual([m["model"] for m in result["models"]], ["im.product"])
+        self.assertIn("im.product", models)
+        self.assertNotIn("im.warehouse", models)
         self.assertFalse(access.enabled)
 
 
@@ -185,7 +204,7 @@ class TestDraftStockMove(McpToolsBase):
 
 class TestApiLogging(McpToolsBase):
     def test_refused_call_is_logged(self):
-        # No access rule at all for im.product -> refused.
+        self._revoke("im.product")  # ensure no access rule at all -> refused
         user = self._create_role_user("Mcp Log User", "mcp_log_user@test.com", "user")
         connector = self.env["im.mcp.connector"].create({"name": "C", "user_id": user.id})
         c_env = self.env(user=user)
