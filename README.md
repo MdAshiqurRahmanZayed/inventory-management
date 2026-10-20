@@ -2,17 +2,20 @@
 
 An Odoo inventory app (`inventory_management`) with its own OWL dashboard, plus a companion addon (`im_mcp`) that exposes a native **MCP server** — no separate process — so an AI assistant can check stock and draft stock moves through Odoo's own access rules.
 
-## Status: Ongoing / Not Complete
+## Features
 
-This is an active, in-progress project. It is **not** production-ready. Core data models (products, categories, partner roles, warehouses, locations), purchasing, sales/adjustments, role-based access (Stock Viewer/User/Manager groups and record rules), low-stock alerts, a full OWL dashboard (stock value, low-stock, open orders, 7-day moves, top movers), a per-warehouse PDF stock report, and an MCP connector (global per-model access rules, generic record tools, a stock-move tool, and an audit log) are implemented.
+- Products, categories, suppliers and customers (suppliers/customers are Odoo contacts with a role, so one contact can both buy from and sell to you)
+- Warehouses holding multiple locations
+- Purchase orders → supplier receipts, sales orders → customer shipments, both going from Draft to Confirmed to Done through tracked stock moves
+- Per-location stock, always computed from Done moves — never written directly
+- Stock adjustments as a permanent, reasoned audit trail
+- Low-stock alerts: a daily job flags products below their reorder level and assigns a to-do to the responsible person
+- Three roles (Stock Viewer/User/Manager) with real record-level access rules, not just menu hiding
+- An OWL dashboard: stock value, low-stock count, open orders, 7-day move breakdown, 30-day top movers
+- A per-warehouse PDF stock report
+- A native **MCP connector** (`im_mcp`) letting an AI assistant check stock and draft moves through Odoo's own permissions — no bypass, no separate server
 
-## Naming note
-
-This project was originally called "Stock Pilot". It has been renamed to **Inventory Management** to match this repository's name; the module technical name is `inventory_management` (previously `stock_pilot`).
-
-## Odoo version note
-
-This scaffold and its Docker environment run **Odoo 19**, per explicit project decision (the plan below was originally written against Odoo 18).
+Runs on **Odoo 19**.
 
 ## Addons layout: `addons/` vs `extra-addons/`
 
@@ -29,44 +32,9 @@ Fetch it (and any future OCA modules the script is extended to cover):
 ```
 Safe to re-run — it skips any module already present in `extra-addons/`.
 
-## Project Plan
+## Architecture
 
-### Goal
-
-Build **Inventory Management**, a simple inventory app for Odoo with its own OWL dashboard, plus a built-in **MCP server** that lets an AI assistant check stock and draft stock moves through Odoo's own access rules. Plan for about 10 weeks of evenings and weekends. The data model follows the standard inventory ER designs from GeeksforGeeks and Kladana (see Sources).
-
-- **Odoo module** (`inventory_management`): shows models, security, views, wizards, cron and **OWL frontend** work, which your resume does not show yet.
-- **MCP connector**: shows API design, authentication and safe AI tool access, implemented as a native Odoo HTTP endpoint inside the same module — no separate server to deploy.
-- Together they tell one story: a working business app that other systems and AI assistants can use safely.
-
-### Scope
-
-Keep it small and finished: one warehouse flow done well beats a half-built copy of Odoo Inventory. The module is standalone and depends only on `base` and `mail`, so reviewers can see every line is yours.
-
-**In scope (v1)**
-
-- Products with SKU, description, category, unit, cost, sale price, reorder level and a default supplier
-- Product categories as their own model
-- Suppliers and customers as Odoo contacts (`res.partner`) with a partner_role choice of Supplier, Customer or Both, so one contact can buy from you and sell to you
-- Warehouses with an address and a capacity, each holding several locations (zones or bins)
-- Purchase orders with order lines: confirming one creates the receipt moves
-- Sales orders with order lines: confirming one creates a shipment with its own status and delivery moves
-- Stock moves: receipt, delivery and internal transfer, going from Draft to Confirmed to Done
-- Stock on hand per product and location, computed from Done moves
-- Stock adjustments saved as records with type, quantity, reason and user, as an audit trail
-- Low-stock alerts: a daily cron flags products below their reorder level and posts an activity to the responsible user
-- Three roles: **Stock Viewer**, **Stock User** and **Stock Manager** (see Roles and access)
-- OWL dashboard: stock value, low-stock list, open orders, moves in the last 7 days, top-moving products
-- PDF stock report per warehouse
-
-**Out of scope (v1)**
-
-- Lots and serial numbers, barcodes, multi-company, accounting entries, invoices and payments, returns, pricing rules
-- Note these as a v2 roadmap in the README; it shows you know where the product goes next.
-
-### Architecture
-
-The dashboard and the MCP server both go through Odoo's JSON-RPC API as a real user, so the same access rules protect people and AI alike. Keep them in two repos: `inventory_management` (the Odoo module) and `odoo-mcp` (the connector).
+The dashboard and the MCP server both go through Odoo's own ORM as a real user, so the same access rules protect people and AI alike. `inventory_management` is standalone — depends only on `base` and `mail` — with `im_mcp` as a separate addon depending on it, both in this one repo.
 
 **Data model**
 
@@ -322,35 +290,6 @@ This is a local/demo setup (static API key, no OAuth, no public hosting) — int
 - **"MCP is not allowed to '...' on '...'"** — expected, not a bug: that model has no `im.mcp.access` row, or the row doesn't grant that operation. The message says exactly where to enable it. Check you're using this app's own model names (`im.product`, not `product.product`).
 - **A tool call 500s with a generic "Internal error"** — logged server-side with the real traceback (`_logger.exception` in `services/protocol.py`); the client never sees internals, by design. Check the Odoo log.
 
-### Milestones
-
-6 phases over 10 weeks, 5 gates. Do not start a phase until the gate before it passes. If time runs short, cut the PDF report and top movers before anything in the MCP phase, because the connector is what makes this project stand out.
-
-### Testing and quality
-
-Reviewers judge a repo in about two minutes, so tests and the README matter as much as features.
-
-- **Odoo tests** (`TransactionCase`): purchase order to receipt, sales order to shipment and delivery, move flow and states, quant totals after each move, no negative stock, access for User versus Manager, the cron raising and closing alerts, the adjust wizard.
-- **Dashboard test**: one OWL test (Hoot, Odoo's JS test framework) that the dashboard loads its figures.
-- **MCP tests** (`pytest`): each tool with a mocked Odoo client, input validation, a connector without access to a model or operation getting a clear error, and sensitive models being refused.
-- **Demo data**: about 20 products, 5 suppliers, 10 customers, 2 warehouses, a month of orders and moves, so the dashboard looks real on first install.
-- **README**: what it does, a screenshot of the dashboard, a GIF of Claude drafting a stock move, install steps for both repos, and the v2 roadmap.
-- **Code style**: follow Odoo's module layout and naming, and keep commits small with clear messages.
-
-### Resume points (draft)
-
-Use these once the project is built, and change any detail that ends up different.
-
-> **Inventory Management** | GitHub | Demo
->
-> - Built an **Odoo** inventory module covering **purchase and sales orders**, supplier receipts, customer shipments, per-location stock, audited **stock adjustments**, **low-stock alerts**, role-based **access rules**, and an **OWL dashboard**.
-> - Built an **MCP server** that lets AI assistants check stock and orders and draft moves through Odoo's own permissions, with per-user **API keys**, model-based access that Managers set per connector in Odoo, and a full **audit log**.
-
-### Sources
-
-- [How to Design ER Diagrams for Inventory and Warehouse Management](https://www.geeksforgeeks.org/sql/how-to-design-er-diagrams-for-inventory-and-warehouse-management/), GeeksforGeeks: customer, product, supplier, warehouse, order and shipment entities.
-- [ER Diagram for Inventory Management System](https://www.kladana.com/blog/inventory-management/er-diagram-for-inventory-management-system/), Kladana: purchase and sales orders, reorder level, stored stock adjustments, bridge tables and naming advice.
-
 ## Running with Docker
 
 Requires Docker and Docker Compose.
@@ -377,6 +316,10 @@ Requires Docker and Docker Compose.
 To stop the environment: `docker compose down` (add `-v` to also drop the database volume).
 
 **Security note:** `odoo.conf` (copied from `odoo.conf.example`, gitignored) has placeholder `admin_passwd`/DB credentials. Change them if you ever run this somewhere reachable beyond your own machine.
+
+## Testing
+
+Both addons are covered by `TransactionCase` tests against the real Odoo ORM (no mocking): purchase-order-to-receipt and sale-order-to-delivery flows, move state transitions, quant totals, negative-stock prevention, role-based access, the low-stock cron, the adjustment flow, and — for `im_mcp` — the JSON-RPC envelope, endpoint auth, and every tool's access scoping and argument coercion. Demo data (`--with-demo`) seeds ~20 products, suppliers, customers, two warehouses, and a month of orders/moves so the dashboard looks real on first install.
 
 ## Running tests
 
@@ -414,20 +357,28 @@ docker compose run --rm odoo odoo -d ci_test \
 - `docker-compose.yml`, `odoo.conf.example` — local dev environment (copy `odoo.conf.example` to `odoo.conf`, gitignored; it's the single place DB credentials, admin password, and addons path are configured). Mounts both `addons/` and `extra-addons/` into the container at `/mnt/addons` and `/mnt/extra-addons` respectively.
 - `openspec/` — [OpenSpec](https://openspec.dev) planning artifacts (proposals, specs, design, tasks) driving this project's development.
 - `ruff.toml` — lint config for this repo's Python code (excludes vendored `extra-addons/`).
-- `.github/workflows/ci.yml` — CI: ruff lint + both addons' tests run against Postgres via Docker Compose, on every push/PR to `main`.
+- `.github/workflows/ruff.yml` — lint, automatic on every push/PR to `main`.
+- `.github/workflows/odoo-tests.yml` — both addons' tests against Postgres via Docker Compose, manual trigger only (`workflow_dispatch`).
 
 ## CI
 
-On every push/PR to `main`:
-- **Ruff lint** — `ruff check` against the repo (vendored `extra-addons/` excluded).
-- **Odoo tests** — starts Postgres (waits for its healthcheck), then installs and runs both `inventory_management`'s and `im_mcp`'s test suites headlessly via `docker compose run`, isolated with `--test-tags /inventory_management,/im_mcp`.
+Two separate workflows, not one combined pipeline:
+
+- **`.github/workflows/ruff.yml`** — runs automatically on every push/PR to `main`. `ruff check` against the repo (vendored `extra-addons/` excluded).
+- **`.github/workflows/odoo-tests.yml`** — **manual only** (`workflow_dispatch`), does **not** run on push or PR. Trigger it from the Actions tab: *Actions > Odoo tests > Run workflow*. Starts Postgres (waits for its healthcheck), then installs and runs `role_management`, `inventory_management`, and `im_mcp`'s test suites headlessly via `docker compose run`, isolated with `--test-tags /inventory_management,/im_mcp`.
+
+Odoo tests were split out of the automatic pipeline deliberately — they're slower (image pulls + a full Odoo boot) and the project is a solo portfolio repo, so running them on demand before a PR merge is enough; ruff stays automatic since it's seconds, not minutes.
 
 Run the same checks locally:
 ```bash
 ruff check
-docker compose run --rm odoo odoo -d ci_test -i inventory_management --test-enable --test-tags /inventory_management --stop-after-init --http-port=8169
+docker compose run --rm odoo odoo -d ci_test -i role_management,inventory_management,im_mcp \
+  --test-enable --test-tags /inventory_management,/im_mcp \
+  --stop-after-init --http-port=8169
 ```
 
 ## Roadmap
 
-Products, orders, moves, stock, role-based access, low-stock alerts, the full dashboard widget set, the per-warehouse PDF stock report, and the MCP connector are implemented — see `openspec/` for planning artifacts. Possible v2 items: lots/serial numbers, barcodes, multi-company, OAuth-based MCP auth for a public connector listing, rate-limit enforcement.
+Not planned work, just honest gaps: lot/serial numbers, barcodes, multi-company, accounting/invoicing, returns, pricing rules — none of these are implemented. On the MCP side: OAuth 2.0 (needed for public connector-directory listing, currently out of scope by design — static API keys only), rate-limit enforcement (the field exists, isn't checked yet), and a proper schema-builder widget for access-rule domains/fields (currently raw text/picker fields, no UI builder).
+
+See `openspec/changes/` for the design history behind each phase of this project.
